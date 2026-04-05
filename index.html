@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="8th Ape Studio — minimal tools and clean interfaces built for real use." />
+  <title>8th Ape Studio</title>
+  <link rel="icon" href="/assets/logo.png" type="image/png" />
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --accent: #00f0ff;
+      --accent-dim: rgba(0, 240, 255, 0.12);
+      --accent-glow: rgba(0, 240, 255, 0.35);
+      --bg: #000000;
+      --surface: rgba(255, 255, 255, 0.03);
+      --surface-hover: rgba(0, 240, 255, 0.06);
+      --border: rgba(255, 255, 255, 0.07);
+      --border-accent: rgba(0, 240, 255, 0.4);
+      --text: #e8e8e8;
+      --muted: #555566;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 16px;
+      line-height: 1.6;
+      min-width: 1100px;
+      overflow-x: hidden;
+    }
+
+    /* GRID BACKGROUND */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(0, 240, 255, 0.025) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0, 240, 255, 0.025) 1px, transparent 1px);
+      background-size: 72px 72px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: none;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1.25rem 6rem;
+      background: rgba(0, 0, 0, 0.7);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(16px);
+    }
+
+    .nav-left {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .nav-icon {
+      width: 32px;
+      height: 32px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 6px var(--accent-glow));
+    }
+
+    .nav-logo {
+      font-size: 0.9rem;
+      font-weight: bold;
+      color: var(--accent);
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+    }
+
+    .nav-links {
+      display: flex;
+      gap: 2.5rem;
+      list-style: none;
+    }
+
+    .nav-links a {
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      transition: color 0.2s;
+    }
+
+    .nav-links a:hover {
+      color: var(--accent);
+    }
+
+    /* HERO */
+    .hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      padding: 0 6rem;
+      gap: 4rem;
+    }
+
+    .hero-text {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .hero-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.3em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 2rem;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .hero-label::before {
+      content: '';
+      display: block;
+      width: 32px;
+      height: 1px;
+      background: var(--accent);
+    }
+
+    .hero h1 {
+      font-size: clamp(3.5rem, 5.5vw, 7rem);
+      font-weight: bold;
+      color: #fff;
+      letter-spacing: -0.03em;
+      line-height: 1.0;
+      margin-bottom: 2rem;
+    }
+
+    .hero h1 .accent {
+      color: var(--accent);
+      text-shadow: 0 0 40px var(--accent-glow), 0 0 80px rgba(0, 240, 255, 0.15);
+    }
+
+    .hero-sub {
+      font-size: 1rem;
+      color: var(--muted);
+      max-width: 400px;
+      line-height: 1.9;
+      margin-bottom: 3rem;
+    }
+
+    .hero-cta {
+      display: flex;
+      gap: 1rem;
+    }
+
+    .btn {
+      display: inline-block;
+      padding: 0.75rem 2rem;
+      font-family: inherit;
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+      border: 1px solid var(--accent);
+      color: var(--accent);
+      background: transparent;
+      cursor: pointer;
+      transition: background 0.2s, color 0.2s, box-shadow 0.2s;
+    }
+
+    .btn:hover {
+      background: var(--accent);
+      color: #000;
+      box-shadow: 0 0 24px var(--accent-glow);
+    }
+
+    .btn-ghost {
+      border-color: var(--border);
+      color: var(--muted);
+    }
+
+    .btn-ghost:hover {
+      background: rgba(255,255,255,0.06);
+      color: var(--text);
+      box-shadow: none;
+    }
+
+    /* HERO IMAGE */
+    .hero-visual {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .hero-sphere {
+      width: 520px;
+      height: 520px;
+      object-fit: contain;
+      filter: drop-shadow(0 0 60px rgba(0, 240, 255, 0.25));
+      animation: glow-pulse 5s ease-in-out infinite;
+    }
+
+    @keyframes glow-pulse {
+      0%, 100% {
+        filter: drop-shadow(0 0 60px rgba(0, 240, 255, 0.25));
+      }
+      50% {
+        filter: drop-shadow(0 0 100px rgba(0, 240, 255, 0.5)) drop-shadow(0 0 160px rgba(0, 240, 255, 0.15));
+      }
+    }
+
+    /* SCROLL HINT */
+    .scroll-hint {
+      position: absolute;
+      bottom: 2.5rem;
+      left: 50%;
+      transform: translateX(-50%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.5rem;
+      color: var(--muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+    }
+
+    .scroll-hint::after {
+      content: '';
+      display: block;
+      width: 1px;
+      height: 48px;
+      background: linear-gradient(to bottom, var(--accent), transparent);
+      animation: scroll-line 2s ease-in-out infinite;
+    }
+
+    @keyframes scroll-line {
+      0%, 100% { opacity: 0.3; }
+      50% { opacity: 1; }
+    }
+
+    /* SECTIONS */
+    section {
+      position: relative;
+      z-index: 1;
+      padding: 8rem 6rem;
+      border-top: 1px solid var(--border);
+    }
+
+    .section-header {
+      display: flex;
+      align-items: baseline;
+      gap: 2rem;
+      margin-bottom: 5rem;
+    }
+
+    .section-label {
+      font-size: 0.7rem;
+      letter-spacing: 0.25em;
+      color: var(--accent);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+
+    .section-title {
+      font-size: 2.5rem;
+      color: #fff;
+      letter-spacing: -0.02em;
+    }
+
+    .section-line {
+      flex: 1;
+      height: 1px;
+      background: var(--border);
+      margin-bottom: 0.4rem;
+    }
+
+    /* PROJECT CARD */
+    .card {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5rem;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 4rem;
+      transition: border-color 0.3s, background 0.3s;
+      backdrop-filter: blur(8px);
+    }
+
+    .card:hover {
+      border-color: var(--border-accent);
+      background: var(--surface-hover);
+    }
+
+    .card-left {}
+
+    .card-tag {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-title {
+      font-size: 2.25rem;
+      color: #fff;
+      letter-spacing: -0.02em;
+      margin-bottom: 1rem;
+      line-height: 1.1;
+    }
+
+    .card-desc {
+      color: var(--muted);
+      font-size: 0.9rem;
+      line-height: 1.8;
+      margin-bottom: 2rem;
+    }
+
+    .card-actions {
+      display: flex;
+      gap: 0.75rem;
+    }
+
+    .card-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+    }
+
+    .card-features-label {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      color: var(--muted);
+      text-transform: uppercase;
+      margin-bottom: 1.25rem;
+    }
+
+    .card-features {
+      list-style: none;
+    }
+
+    .card-features li {
+      font-size: 0.875rem;
+      color: var(--text);
+      padding: 0.75rem 0;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+
+    .card-features li::before {
+      content: '';
+      display: inline-block;
+      width: 6px;
+      height: 6px;
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+      flex-shrink: 0;
+    }
+
+    .card-features li:last-child {
+      border-bottom: none;
+    }
+
+    /* CONTACT */
+    #contact {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      align-items: center;
+      gap: 4rem;
+    }
+
+    .contact-right {
+      display: flex;
+      flex-direction: column;
+      gap: 1.5rem;
+    }
+
+    .contact-email {
+      font-size: 1.5rem;
+      color: var(--accent);
+      letter-spacing: 0.05em;
+      transition: text-shadow 0.2s;
+    }
+
+    .contact-email:hover {
+      text-shadow: 0 0 24px var(--accent-glow);
+    }
+
+    .contact-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.8;
+    }
+
+    /* FOOTER */
+    footer {
+      position: relative;
+      z-index: 1;
+      border-top: 1px solid var(--border);
+      padding: 2rem 6rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      color: var(--muted);
+      font-size: 0.7rem;
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-left">
+      <img src="/assets/logo.png" alt="8th Ape Studio" class="nav-icon" />
+      <span class="nav-logo">8th Ape Studio</span>
+    </a>
+    <ul class="nav-links">
+      <li><a href="#projects">Projects</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+  </nav>
+
+  <main>
+    <div class="hero">
+      <div class="hero-text">
+        <p class="hero-label">Design &amp; Development</p>
+        <h1>8th Ape<br><span class="accent">Studio</span></h1>
+        <p class="hero-sub">Minimal tools. Clear interfaces.<br>Built for real use.</p>
+        <div class="hero-cta">
+          <a href="#projects" class="btn">View Projects</a>
+          <a href="#contact" class="btn btn-ghost">Contact</a>
+        </div>
+      </div>
+      <div class="hero-visual">
+        <img src="/assets/logo.png" alt="8th Ape Studio" class="hero-sphere" />
+      </div>
+      <div class="scroll-hint">Scroll</div>
+    </div>
+
+    <section id="projects">
+      <div class="section-header">
+        <span class="section-label">Work</span>
+        <h2 class="section-title">Projects</h2>
+        <div class="section-line"></div>
+      </div>
+
+      <div class="card">
+        <div class="card-left">
+          <p class="card-tag">Case Study — 2025</p>
+          <h3 class="card-title">Ärzte<br>Tracker</h3>
+          <p class="card-desc">Stress-optimized medical appointment tracker.<br>Built for everyday use — no account, no bloat.</p>
+          <div class="card-actions">
+            <a href="/projects/aerzte-tracker.html" class="btn">View Case Study</a>
+            <a href="#" class="btn btn-ghost" aria-label="GitHub (coming soon)">GitHub</a>
+          </div>
+        </div>
+        <div class="card-right">
+          <p class="card-features-label">Features</p>
+          <ul class="card-features">
+            <li>Today / Tomorrow logic</li>
+            <li>Auto sorting by nearest appointment</li>
+            <li>Click-to-call</li>
+            <li>LocalStorage — works offline</li>
+            <li>Mobile-first UX</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <section id="contact">
+      <div class="section-header">
+        <span class="section-label">Get in Touch</span>
+        <h2 class="section-title">Contact</h2>
+        <div class="section-line"></div>
+      </div>
+      <div class="contact-right">
+        <a href="mailto:8thApe-Sound@proton.me" class="contact-email">8thApe-Sound@proton.me</a>
+        <p class="contact-note">Open for projects, collaborations,<br>and interesting ideas.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <span>&copy; 2026 8th Ape Studio</span>
+    <span>Design &amp; Development</span>
+  </footer>
+
+</body>
+</html>
