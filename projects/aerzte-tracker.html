@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Ärzte Tracker — Case Study | 8th Ape Studio</title>
+  <style>
+    *, *::before, *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --accent: #00f0ff;
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #1e1e1e;
+      --text: #e0e0e0;
+      --muted: #666666;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 16px;
+      line-height: 1.6;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    /* NAV */
+    nav {
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      z-index: 100;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 1rem 2rem;
+      background: rgba(10, 10, 10, 0.92);
+      border-bottom: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+
+    .nav-logo {
+      font-size: 1rem;
+      font-weight: bold;
+      color: var(--accent);
+      letter-spacing: 0.1em;
+    }
+
+    .nav-back {
+      font-size: 0.875rem;
+      color: var(--muted);
+      letter-spacing: 0.05em;
+      transition: color 0.2s;
+    }
+
+    .nav-back:hover {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    /* HERO */
+    .hero {
+      padding: 8rem 2rem 4rem;
+      max-width: 860px;
+      margin: 0 auto;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .hero-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .hero h1 {
+      font-size: clamp(2rem, 6vw, 3.5rem);
+      color: #ffffff;
+      letter-spacing: -0.02em;
+      line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .hero-sub {
+      color: var(--muted);
+      font-size: 0.9rem;
+      max-width: 520px;
+      line-height: 1.8;
+    }
+
+    /* CONTENT */
+    .content {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 0 2rem 6rem;
+    }
+
+    .cs-section {
+      padding: 3.5rem 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .cs-section:last-child {
+      border-bottom: none;
+    }
+
+    .cs-label {
+      font-size: 0.75rem;
+      letter-spacing: 0.2em;
+      color: var(--accent);
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+    }
+
+    .cs-section h2 {
+      font-size: 1.25rem;
+      color: #fff;
+      margin-bottom: 1.25rem;
+    }
+
+    .cs-section p {
+      color: var(--muted);
+      font-size: 0.875rem;
+      line-height: 1.9;
+      max-width: 640px;
+    }
+
+    .cs-section p + p {
+      margin-top: 1rem;
+    }
+
+    /* LISTS */
+    .cs-list {
+      list-style: none;
+      margin-top: 1rem;
+    }
+
+    .cs-list li {
+      font-size: 0.875rem;
+      color: var(--muted);
+      padding: 0.3rem 0;
+      line-height: 1.7;
+    }
+
+    .cs-list li::before {
+      content: '— ';
+      color: var(--accent);
+    }
+
+    /* TECH STACK */
+    .stack-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6rem;
+      margin-top: 1rem;
+    }
+
+    .stack-tag {
+      font-size: 0.75rem;
+      letter-spacing: 0.08em;
+      color: var(--accent);
+      border: 1px solid var(--accent);
+      padding: 0.25rem 0.75rem;
+    }
+
+    /* RESULT HIGHLIGHT */
+    .result-quote {
+      margin-top: 1.5rem;
+      padding: 1.5rem;
+      border-left: 2px solid var(--accent);
+      background: var(--surface);
+      color: var(--text);
+      font-size: 0.9rem;
+      line-height: 1.8;
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2rem;
+      text-align: center;
+      color: var(--muted);
+      font-size: 0.75rem;
+      letter-spacing: 0.05em;
+    }
+
+    /* MOBILE */
+    @media (max-width: 480px) {
+      nav {
+        padding: 1rem;
+      }
+
+      .hero {
+        padding: 6rem 1.25rem 3rem;
+      }
+
+      .content {
+        padding: 0 1.25rem 4rem;
+      }
+
+      .cs-section {
+        padding: 2.5rem 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <nav>
+    <a href="/" class="nav-logo">8th Ape Studio</a>
+    <a href="/#projects" class="nav-back">← Projects</a>
+  </nav>
+
+  <div class="hero">
+    <p class="hero-label">Case Study</p>
+    <h1>Ärzte Tracker</h1>
+    <p class="hero-sub">Stress-optimized medical appointment tracker built for daily use on mobile.</p>
+  </div>
+
+  <div class="content">
+
+    <div class="cs-section">
+      <p class="cs-label">01</p>
+      <h2>Problem</h2>
+      <p>Managing medical appointments is unexpectedly stressful — especially for people with multiple doctors, recurring checkups, or family members to coordinate for.</p>
+      <p>Existing apps are bloated, require accounts, or are designed for clinics rather than patients. The result: people default to paper notes or scattered calendar entries, and miss appointments or forget to call.</p>
+    </div>
+
+    <div class="cs-section">
+      <p class="cs-label">02</p>
+      <h2>Approach</h2>
+      <p>Strip everything down to the essential task: know who your doctor is, when your next appointment is, and be able to call them immediately.</p>
+      <p>No sign-up. No sync. No notifications that need permissions. Just a fast, local tool that works offline, lives in the browser, and gets out of the way.</p>
+    </div>
+
+    <div class="cs-section">
+      <p class="cs-label">03</p>
+      <h2>Design Principles</h2>
+      <ul class="cs-list">
+        <li>Reduce friction at every step</li>
+        <li>Surface the most urgent information first</li>
+        <li>One tap to call — always visible</li>
+        <li>No clutter, no settings screens</li>
+        <li>Works on the smallest mobile screen</li>
+      </ul>
+    </div>
+
+    <div class="cs-section">
+      <p class="cs-label">04</p>
+      <h2>Features</h2>
+      <ul class="cs-list">
+        <li>Today / Tomorrow smart labels on appointments</li>
+        <li>Auto-sort by nearest upcoming date</li>
+        <li>Click-to-call doctor directly from the card</li>
+        <li>Full offline support via LocalStorage</li>
+        <li>Mobile-first layout — thumb-friendly</li>
+      </ul>
+    </div>
+
+    <div class="cs-section">
+      <p class="cs-label">05</p>
+      <h2>Tech Stack</h2>
+      <div class="stack-grid">
+        <span class="stack-tag">HTML</span>
+        <span class="stack-tag">CSS</span>
+        <span class="stack-tag">Vanilla JS</span>
+        <span class="stack-tag">LocalStorage</span>
+      </div>
+      <p style="margin-top: 1.25rem;">No frameworks. No dependencies. No build step. The entire app ships as a single HTML file.</p>
+    </div>
+
+    <div class="cs-section">
+      <p class="cs-label">06</p>
+      <h2>Result</h2>
+      <p>A focused, zero-friction tool that does exactly one job well. Loads instantly, works offline, and fits in a single file.</p>
+      <div class="result-quote">
+        Built for real use — not for a portfolio. Designed around the actual stress points of managing medical care, not around feature checklists.
+      </div>
+    </div>
+
+  </div>
+
+  <footer>
+    &copy; 2026 8th Ape Studio
+  </footer>
+
+</body>
+</html>
