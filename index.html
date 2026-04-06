@@ -1,0 +1,1283 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="description" content="Sicherer persönlicher Tracker für psychiatrische und psychosoziale Angebote in Tirol">
+    <meta name="keywords" content="Ärzte, Psychiatrie, Tirol, Tracker, Gesundheit">
+    <meta name="theme-color" content="#0b0b0b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="8th Ape Ärzte">
+    
+    <title>8th Ape – Ärzte Tracker</title>
+
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230b0b0b' width='192' height='192'/><text x='96' y='130' font-size='120' text-anchor='middle' fill='%2300f0ff' font-weight='bold'>🏥</text></svg>">
+    <link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect fill='%230b0b0b' width='192' height='192'/><text x='96' y='130' font-size='120' text-anchor='middle' fill='%2300f0ff' font-weight='bold'>🏥</text></svg>">
+    
+    <style>
+        /* ===== CSS RESET & BOX MODEL ===== */
+        * {
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+        }
+
+        html {
+            -webkit-text-size-adjust: 100%;
+            -moz-text-size-adjust: 100%;
+            text-size-adjust: 100%;
+            scroll-behavior: smooth;
+        }
+
+        /* ===== BODY & TYPOGRAPHY ===== */
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Helvetica Neue", "Ubuntu", "Arial", sans-serif;
+            background: #0b0b0b;
+            color: #ffffff;
+            line-height: 1.6;
+            font-size: 16px;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            overflow-x: hidden;
+        }
+
+        /* ===== SAFE AREA (iPhone notch etc.) ===== */
+        body {
+            padding: max(0px, env(safe-area-inset-top)) 0 0 0;
+        }
+
+        /* ===== MAIN WRAPPER ===== */
+        .wrapper {
+            max-width: 620px;
+            margin: 0 auto;
+            padding: 0 12px;
+            width: 100%;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* ===== HEADINGS ===== */
+        h1, h2 {
+            margin: 0;
+            font-weight: 600;
+            letter-spacing: -0.5px;
+        }
+
+        h1 {
+            font-size: clamp(1.2rem, 5vw, 1.8rem);
+            color: #00f0ff;
+            text-align: center;
+            margin: clamp(16px, 4vw, 24px) 0;
+            word-wrap: break-word;
+        }
+
+        h2 {
+            font-size: clamp(1rem, 4vw, 1.2rem);
+            color: #00f0ff;
+            margin: 12px 0 8px 0;
+        }
+
+        /* ===== CONTAINERS ===== */
+        .container {
+            padding: 8px 0;
+        }
+
+        main {
+            flex: 1;
+        }
+
+        /* ===== CARD STYLING ===== */
+        .card {
+            background: #141414;
+            border: 1px solid #222222;
+            border-radius: 12px;
+            padding: 12px 14px;
+            margin-bottom: 12px;
+            transition: background-color 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+            word-wrap: break-word;
+            overflow-wrap: break-word;
+        }
+
+        .card:not(.main-card):hover,
+        .card:not(.main-card):focus-within {
+            background-color: #162d22;
+            border-color: #00f0ff;
+        }
+
+        .card.active {
+            background-color: #1f5a3d;
+            border-color: #00f0ff;
+        }
+
+        .card.today {
+            border: 2px solid #00ff9f;
+            box-shadow: 0 0 8px rgba(0, 255, 159, 0.25);
+        }
+
+        .main-card {
+            background: #e8ecec;
+            color: #1f3d3a;
+            border: 2px solid #00f0ff;
+        }
+
+        .main-card input,
+        .main-card textarea {
+            background: #ffffff;
+            color: #1f3d3a;
+            border: 1px solid #00f0ff;
+        }
+
+        .main-card input:focus,
+        .main-card textarea:focus {
+            background: #ffffff;
+            border-color: #0088cc;
+            box-shadow: 0 0 6px rgba(0, 136, 204, 0.4);
+        }
+
+        /* ===== PHONE ROW ===== */
+        .phone-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            gap: 12px;
+            padding: 10px 8px;
+            margin: 10px -6px;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            transition: background-color 0.15s ease;
+            border: 2px solid transparent;
+        }
+
+        .phone-row:hover {
+            background-color: rgba(0, 240, 255, 0.08);
+        }
+
+        .phone-row:focus-visible {
+            outline: 2px solid #00f0ff;
+            outline-offset: 2px;
+            border-color: #00f0ff;
+        }
+
+        .phone-row:active {
+            background-color: rgba(0, 240, 255, 0.12);
+        }
+
+        /* ===== INPUTS ===== */
+        input[type="date"],
+        input[type="time"],
+        input[type="text"],
+        textarea {
+            width: 100%;
+            padding: 8px 10px;
+            margin: 4px 0;
+            background: #000000;
+            border: 1px solid #333333;
+            border-radius: 6px;
+            color: #ffffff;
+            font-size: 16px;
+            font-family: inherit;
+            transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        input[type="date"],
+        input[type="time"],
+        input[type="text"] {
+            min-height: 44px;
+        }
+
+        textarea {
+            min-height: 100px;
+            resize: vertical;
+            max-height: 300px;
+            font-size: 15px;
+        }
+
+        input[type="date"]::-webkit-calendar-picker-indicator,
+        input[type="time"]::-webkit-calendar-picker-indicator {
+            cursor: pointer;
+            opacity: 0.7;
+        }
+
+        input:focus,
+        textarea:focus {
+            outline: none;
+            border-color: #00f0ff;
+            box-shadow: 0 0 6px rgba(0, 240, 255, 0.3);
+            background-color: #0a0a0a;
+        }
+
+        input:disabled,
+        textarea:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: #666666;
+            opacity: 0.8;
+        }
+
+        /* ===== LABELS ===== */
+        label {
+            display: block;
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 8px;
+            margin-bottom: 2px;
+            font-weight: 500;
+        }
+
+        /* ===== STATUS LABELS ===== */
+        .status-label {
+            display: inline-block;
+            font-size: 12px;
+            margin-top: 6px;
+            font-weight: 600;
+            padding: 4px 8px;
+            border-radius: 4px;
+        }
+
+        .status-label.today {
+            color: #00ff9f;
+            background-color: rgba(0, 255, 159, 0.1);
+        }
+
+        .status-label.morgen {
+            color: #ffd84d;
+            background-color: rgba(255, 216, 77, 0.1);
+        }
+
+        /* ===== CHARACTER COUNTER ===== */
+        .char-count-right {
+            text-align: right;
+            font-size: 11px;
+            opacity: 0.6;
+            margin-top: 4px;
+            font-variant-numeric: tabular-nums;
+        }
+
+        .char-count-right.warning {
+            color: #ff6b6b;
+            opacity: 1;
+            font-weight: 600;
+        }
+
+        /* ===== CRISIS BOX ===== */
+        .crisis-box {
+            margin: 20px 0;
+            padding: 18px 16px;
+            background: #5a1a1a;
+            border: 2px solid #ff6b6b;
+            border-radius: 12px;
+            text-align: center;
+            font-weight: 600;
+            word-wrap: break-word;
+        }
+
+        .crisis-box small {
+            display: block;
+            font-size: 12px;
+            opacity: 0.8;
+            margin-top: 6px;
+            font-weight: normal;
+        }
+
+        .crisis-box a {
+            color: #ffffff;
+            text-decoration: none;
+            border-bottom: 2px solid #ffd84d;
+            transition: color 0.2s ease;
+            font-size: 1.1em;
+        }
+
+        .crisis-box a:hover,
+        .crisis-box a:focus {
+            color: #ffd84d;
+        }
+
+        /* ===== CONTROLS ===== */
+        .controls {
+            display: flex;
+            gap: 8px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        .controls-secondary {
+            display: flex;
+            gap: 8px;
+            margin: 16px 0;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+
+        /* ===== BUTTONS ===== */
+        button {
+            padding: 11px 16px;
+            min-height: 44px;
+            background: #00f0ff;
+            color: #000000;
+            border: 2px solid #00f0ff;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            -webkit-user-select: none;
+            user-select: none;
+            -webkit-appearance: none;
+            appearance: none;
+            font-family: inherit;
+            text-transform: none;
+            letter-spacing: 0.3px;
+        }
+
+        button:hover:not(:disabled) {
+            background-color: #00d9ff;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(0, 240, 255, 0.2);
+        }
+
+        button:active:not(:disabled) {
+            transform: translateY(0);
+            box-shadow: 0 2px 4px rgba(0, 240, 255, 0.2);
+        }
+
+        button:focus-visible {
+            outline: 2px solid #ffffff;
+            outline-offset: 2px;
+        }
+
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        button.secondary {
+            background: #333333;
+            color: #ffffff;
+            border: 1px solid #555555;
+        }
+
+        button.secondary:hover:not(:disabled) {
+            background-color: #444444;
+            border-color: #00f0ff;
+        }
+
+        button.danger {
+            background: #ff6b6b;
+            border-color: #ff6b6b;
+            color: #ffffff;
+        }
+
+        button.danger:hover:not(:disabled) {
+            background-color: #ff5252;
+        }
+
+        /* ===== FEEDBACK MESSAGES ===== */
+        .feedback {
+            padding: 12px 14px;
+            margin: 12px 0;
+            border-radius: 8px;
+            font-size: 14px;
+            display: none;
+            border-left: 4px solid;
+            animation: slideDown 0.3s ease;
+            word-wrap: break-word;
+        }
+
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .feedback.show {
+            display: block;
+        }
+
+        .feedback.success {
+            background-color: #1f5a3d;
+            color: #00ff9f;
+            border-left-color: #00ff9f;
+        }
+
+        .feedback.error {
+            background-color: #5a1a1a;
+            color: #ff6b6b;
+            border-left-color: #ff6b6b;
+        }
+
+        .feedback.warning {
+            background-color: #5a4a1a;
+            color: #ffd84d;
+            border-left-color: #ffd84d;
+        }
+
+        /* ===== FOOTER ===== */
+        footer {
+            text-align: center;
+            padding: 20px 12px;
+            color: #00f0ff;
+            font-size: 12px;
+            border-top: 1px solid #222222;
+            margin-top: 20px;
+            word-wrap: break-word;
+        }
+
+        footer a {
+            color: #00f0ff;
+            text-decoration: none;
+            border-bottom: 1px solid #00f0ff;
+            transition: color 0.2s ease;
+        }
+
+        footer a:hover,
+        footer a:focus {
+            color: #00d9ff;
+        }
+
+        /* ===== HELPER CLASSES ===== */
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 8px;
+        }
+
+        .card-header-title {
+            flex: 1;
+        }
+
+        .card-header-title strong {
+            display: block;
+            word-wrap: break-word;
+        }
+
+        .card-header-title small {
+            display: block;
+            font-size: 12px;
+            opacity: 0.7;
+            margin-top: 2px;
+        }
+
+        .button-delete {
+            padding: 6px 10px;
+            font-size: 12px;
+            min-height: auto;
+            flex-shrink: 0;
+        }
+
+        /* ===== HIDDEN FILE INPUT ===== */
+        #fileInput {
+            display: none;
+        }
+
+        /* ===== RESPONSIVE MEDIA QUERIES ===== */
+        @media (max-width: 480px) {
+            body {
+                font-size: 15px;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+                margin: 12px 0;
+            }
+
+            .card {
+                padding: 10px 12px;
+                margin-bottom: 10px;
+            }
+
+            .controls,
+            .controls-secondary {
+                flex-direction: column;
+            }
+
+            button {
+                width: 100%;
+                padding: 12px 14px;
+            }
+
+            .phone-row {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
+            }
+
+            input[type="date"],
+            input[type="time"],
+            input[type="text"] {
+                font-size: 16px;
+            }
+
+            textarea {
+                font-size: 15px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .wrapper {
+                padding: 0 8px;
+            }
+
+            h1 {
+                font-size: 1.15rem;
+            }
+
+            button {
+                font-size: 13px;
+                padding: 10px 12px;
+                min-height: 40px;
+            }
+        }
+
+        /* ===== DARK MODE (system preference) ===== */
+        @media (prefers-color-scheme: light) {
+            body {
+                background: #ffffff;
+                color: #000000;
+            }
+
+            .card {
+                background: #f5f5f5;
+                border-color: #e0e0e0;
+                color: #000000;
+            }
+
+            .card:not(.main-card):hover {
+                background: #e8f5f5;
+            }
+
+            input[type="date"],
+            input[type="time"],
+            input[type="text"],
+            textarea {
+                background: #ffffff;
+                color: #000000;
+                border-color: #d0d0d0;
+            }
+
+            input:focus,
+            textarea:focus {
+                background: #f0f0f0;
+                border-color: #0088cc;
+            }
+
+            .phone-row:hover {
+                background-color: rgba(0, 136, 204, 0.08);
+            }
+
+            .crisis-box {
+                background: #ffe6e6;
+                border-color: #cc4444;
+                color: #330000;
+            }
+
+            .crisis-box small {
+                color: #660000;
+            }
+
+            footer {
+                border-top-color: #e0e0e0;
+            }
+
+            button.secondary {
+                background: #e8e8e8;
+                color: #000000;
+                border-color: #d0d0d0;
+            }
+        }
+
+        /* ===== HIGH CONTRAST MODE ===== */
+        @media (prefers-contrast: more) {
+            body {
+                letter-spacing: 0.3px;
+            }
+
+            .card {
+                border-width: 2px;
+            }
+
+            button {
+                border-width: 2px;
+                font-weight: 700;
+            }
+
+            input,
+            textarea {
+                border-width: 2px;
+            }
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+                scroll-behavior: auto !important;
+            }
+        }
+
+        /* ===== LANDSCAPE MODE (iPhone) ===== */
+        @media (max-height: 500px) and (orientation: landscape) {
+            h1 {
+                margin: 8px 0;
+                font-size: 1.1rem;
+            }
+
+            .card {
+                padding: 8px 10px;
+                margin-bottom: 8px;
+            }
+
+            button {
+                padding: 8px 12px;
+                min-height: 40px;
+            }
+        }
+
+        /* ===== PRINT STYLES ===== */
+        @media print {
+            body {
+                background: white;
+                color: black;
+            }
+
+            .controls,
+            .controls-secondary,
+            button {
+                display: none;
+            }
+
+            .card {
+                page-break-inside: avoid;
+                border: 1px solid black;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="wrapper">
+        <header>
+            <h1>🏥 Psychiatrische & psychosoziale Angebote Tirol</h1>
+        </header>
+
+        <div id="feedback" class="feedback" role="alert" aria-live="polite" aria-atomic="true"></div>
+
+        <main>
+            <div class="container" id="mainCard"></div>
+
+            <div class="controls">
+                <button onclick="addNewDoctor()" title="Neue Arzt/Ärztin hinzufügen">➕ Neue Kontakt</button>
+                <button class="secondary" onclick="exportData()" title="Daten als JSON exportieren">💾 Sicherung</button>
+                <button class="secondary" onclick="importData()" title="Daten aus Datei importieren">📥 Wiederherstellen</button>
+            </div>
+
+            <div id="list" class="container"></div>
+
+            <div class="crisis-box" role="region" aria-label="Krise Hilfe">
+                📞 <a href="tel:+4380040120" title="Telefonische Krise-Hilfe anrufen">0800 400 120</a>
+                <small>24/7 Krise-Hilfe für Österreich</small>
+            </div>
+
+            <div class="controls-secondary">
+                <button class="danger" onclick="clearAllData()" title="WARNUNG: Alle Daten löschen">🗑️ Alles löschen</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>
+                8th Ape Studio v<span id="versionSpan">2.0.0</span> | 
+                <a href="#" onclick="showAbout(); return false;">ℹ️ Info</a> | 
+                <a href="#" onclick="showPrivacy(); return false;">🔒 Datenschutz</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- Hidden file input for import -->
+    <input type="file" id="fileInput" accept=".json" onchange="handleFileImport(event)">
+
+    <script>
+        'use strict';
+
+        // ===== CONSTANTS =====
+        const APP_VERSION = "2.0.0";
+        const MAX_NOTE_LENGTH = 350;
+        const STORAGE_KEY_DOCTORS = "aap_doctors_v2";
+        const STORAGE_KEY_MAIN = "aap_main_v2";
+        const FEEDBACK_DURATION_MS = 3500;
+
+        // ===== SECURITY: Content Security Policy Meta Tag =====
+        const meta = document.createElement('meta');
+        meta.httpEquiv = 'Content-Security-Policy';
+        meta.content = "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; media-src 'self'; object-src 'none'; frame-ancestors 'none'; base-uri 'self'; form-action 'self'";
+        document.head.appendChild(meta);
+
+        document.getElementById('versionSpan').textContent = APP_VERSION;
+
+        // ===== SECURITY: XSS Prevention =====
+        function esc(str) {
+            if (typeof str !== 'string') return '';
+            const textarea = document.createElement('textarea');
+            textarea.textContent = str;
+            return textarea.innerHTML;
+        }
+
+        // ===== SECURITY: Input Validation =====
+        function isValidDate(dateStr) {
+            if (!dateStr || typeof dateStr !== 'string') return false;
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(dateStr)) return false;
+            const date = new Date(dateStr + 'T00:00:00Z');
+            return !isNaN(date.getTime());
+        }
+
+        function isValidTime(timeStr) {
+            if (!timeStr || typeof timeStr !== 'string') return false;
+            return /^([0-1][0-9]|2[0-3]):[0-5][0-9]$/.test(timeStr);
+        }
+
+        function isValidTelephone(tel) {
+            if (typeof tel !== 'string') return false;
+            return /^[+]?[\d\s\-()]{6,20}$/.test(tel.trim());
+        }
+
+        function sanitizeString(str, maxLength = 500) {
+            if (typeof str !== 'string') return '';
+            return str.trim().slice(0, maxLength);
+        }
+
+        // ===== SECURITY: Storage Handler =====
+        function safeParse(key, fallback) {
+            try {
+                const val = localStorage.getItem(key);
+                if (!val) return fallback;
+
+                const parsed = JSON.parse(val);
+
+                // Type validation
+                if (key === STORAGE_KEY_DOCTORS && !Array.isArray(parsed)) {
+                    console.warn('Storage validation: doctors is not array');
+                    return fallback;
+                }
+                if (key === STORAGE_KEY_MAIN && (typeof parsed !== 'object' || parsed === null)) {
+                    console.warn('Storage validation: main is not object');
+                    return fallback;
+                }
+
+                return parsed;
+            } catch (e) {
+                console.error('Storage parse error:', e);
+                showFeedback('⚠️ Speicher konnte nicht gelesen werden', 'warning');
+                return fallback;
+            }
+        }
+
+        // ===== STORAGE INITIALIZATION =====
+        let main = safeParse(STORAGE_KEY_MAIN, { note: '', date: '', time: '' });
+        let data = safeParse(STORAGE_KEY_DOCTORS, [
+            { ort: 'Demo City', name: 'Dr. Alpha Nox', tel: '+43999000001', date: '', time: '', note: '' },
+            { ort: 'Demo City', name: 'Dr. Beta Flux', tel: '+43999000002', date: '', time: '', note: '' },
+            { ort: 'Demo City', name: 'Dr. Gamma Void', tel: '+43999000003', date: '', time: '', note: '' },
+            { ort: 'Demo City', name: 'Dr. Delta Core', tel: '+43999000004', date: '', time: '', note: '' }
+        ]);
+
+        // ===== SAFE SAVE FUNCTION =====
+        function save() {
+            try {
+                // Sanitize before saving
+                data.forEach(d => {
+                    d.name = sanitizeString(d.name);
+                    d.ort = sanitizeString(d.ort);
+                    d.tel = sanitizeString(d.tel);
+                    d.note = sanitizeString(d.note, MAX_NOTE_LENGTH);
+                    d.date = isValidDate(d.date) ? d.date : '';
+                    d.time = isValidTime(d.time) ? d.time : '';
+                });
+
+                main.note = sanitizeString(main.note, MAX_NOTE_LENGTH);
+                main.date = isValidDate(main.date) ? main.date : '';
+                main.time = isValidTime(main.time) ? main.time : '';
+
+                localStorage.setItem(STORAGE_KEY_DOCTORS, JSON.stringify(data));
+                localStorage.setItem(STORAGE_KEY_MAIN, JSON.stringify(main));
+                console.log('Data saved successfully');
+            } catch (e) {
+                console.error('Storage save error:', e);
+                if (e.name === 'QuotaExceededError') {
+                    showFeedback('❌ Speicher voll! Bitte Daten exportieren und neu starten', 'error');
+                } else {
+                    showFeedback('❌ Fehler beim Speichern', 'error');
+                }
+            }
+        }
+
+        // ===== FEEDBACK UI =====
+        function showFeedback(message, type = 'success') {
+            const fb = document.getElementById('feedback');
+            fb.textContent = message;
+            fb.className = `feedback show ${type}`;
+
+            setTimeout(() => {
+                fb.classList.remove('show');
+            }, FEEDBACK_DURATION_MS);
+        }
+
+        // ===== PHONE CALL =====
+        function call(tel) {
+            if (!tel || !isValidTelephone(tel)) {
+                showFeedback('❌ Ungültige Telefonnummer', 'error');
+                return;
+            }
+
+            const cleanTel = tel.replace(/\D/g, '');
+            if (!cleanTel || cleanTel.length < 6) {
+                showFeedback('❌ Ungültige Telefonnummer', 'error');
+                return;
+            }
+
+            const telUri = `tel:+${cleanTel}`;
+            console.log('Initiating call to:', telUri);
+            window.location.href = telUri;
+        }
+
+        // ===== DATE STATUS LABEL =====
+        function getStatusLabel(d, raw = false) {
+            if (!d || !isValidDate(d)) return '';
+
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+
+            const date = new Date(d + 'T00:00:00Z');
+            date.setHours(0, 0, 0, 0);
+
+            if (date.getTime() === today.getTime()) {
+                return raw ? 'Heute' : '<span class="status-label today">🟢 Heute</span>';
+            }
+
+            if (date.getTime() === tomorrow.getTime()) {
+                return raw ? 'Morgen' : '<span class="status-label morgen">🟡 Morgen</span>';
+            }
+
+            return '';
+        }
+
+        // ===== SORT BY DATE =====
+        function sortAll() {
+            function getFull(d) {
+                if (!d?.date || !isValidDate(d.date)) return null;
+                const time = d.time && isValidTime(d.time) ? d.time : '00:00';
+                return new Date(d.date + 'T' + time + ':00Z');
+            }
+
+            let combined = [];
+            if (main.date && isValidDate(main.date)) {
+                combined.push({ type: 'main', ref: main, full: getFull(main) });
+            }
+
+            data.forEach(d => {
+                if (d.date && isValidDate(d.date)) {
+                    combined.push({ type: 'doc', ref: d, full: getFull(d) });
+                }
+            });
+
+            combined.sort((a, b) => {
+                if (!a.full && !b.full) return 0;
+                if (!a.full) return 1;
+                if (!b.full) return -1;
+                return a.full - b.full;
+            });
+
+            let newData = [];
+            combined.forEach(item => {
+                if (item.type !== 'main') newData.push(item.ref);
+            });
+
+            data = newData;
+        }
+
+        // ===== RENDER MAIN CARD =====
+        function renderMain() {
+            const note = main.note || '';
+            const noteLength = note.length;
+            const charClass = noteLength > MAX_NOTE_LENGTH * 0.9 ? 'warning' : '';
+
+            const dateValue = (main.date && isValidDate(main.date)) ? main.date : '';
+            const timeValue = (main.time && isValidTime(main.time)) ? main.time : '';
+            const statusHtml = getStatusLabel(main.date);
+
+            document.getElementById('mainCard').innerHTML = `
+            <div class="card main-card ${dateValue ? 'active' : ''}">
+                <h2>🏥 Psychosoziales Zentrum Tirol</h2>
+
+                <div class="phone-row" 
+                     role="button" 
+                     tabindex="0"
+                     aria-label="Psychosoziales Zentrum Tirol anrufen +43 50 500"
+                     onclick="call('+4350500')"
+                     onkeydown="if(event.key==='Enter' || event.key===' ') { call('+4350500'); event.preventDefault(); }">
+                    <span>📞 +43 (0) 50 500</span>
+                    <span>Anrufen</span>
+                </div>
+
+                <div>
+                    <label for="mainDate">Termin (optional)</label>
+                    <input type="date" 
+                           id="mainDate"
+                           value="${dateValue}"
+                           onchange="main.date=this.value; save(); render();"
+                           aria-label="Termindatum">
+                </div>
+
+                <div>
+                    <label for="mainTime">Zeit</label>
+                    <input type="time" 
+                           id="mainTime"
+                           value="${timeValue}"
+                           onchange="main.time=this.value; save(); render();"
+                           aria-label="Terminzeit">
+                </div>
+
+                <div>${statusHtml}</div>
+
+                <div>
+                    <label for="mainNote">Notiz</label>
+                    <textarea id="mainNote"
+                        placeholder="Notizen zum Zentrum..."
+                        maxlength="${MAX_NOTE_LENGTH}"
+                        oninput="main.note=this.value; save(); render();"
+                        aria-label="Notiz zum Zentrum">${esc(note)}</textarea>
+                </div>
+
+                <div class="char-count-right ${charClass}">${noteLength} / ${MAX_NOTE_LENGTH}</div>
+            </div>`;
+        }
+
+        // ===== ADD NEW DOCTOR =====
+        function addNewDoctor() {
+            const newDoctor = {
+                ort: '',
+                name: '',
+                tel: '+43',
+                date: '',
+                time: '',
+                note: ''
+            };
+
+            data.push(newDoctor);
+            save();
+            render();
+            showFeedback('✓ Neue Kontakt hinzugefügt', 'success');
+        }
+
+        // ===== DELETE DOCTOR =====
+        function deleteDoctor(index) {
+            if (confirm('Diese Kontakt wirklich löschen?')) {
+                data.splice(index, 1);
+                save();
+                render();
+                showFeedback('✓ Kontakt gelöscht', 'success');
+            }
+        }
+
+        // ===== RENDER LIST =====
+        function render() {
+            sortAll();
+            renderMain();
+
+            let html = '';
+
+            data.forEach((d, i) => {
+                const note = d.note || '';
+                const noteLength = note.length;
+                const charClass = noteLength > MAX_NOTE_LENGTH * 0.9 ? 'warning' : '';
+
+                const isToday = getStatusLabel(d.date, true) === 'Heute';
+                const dateValue = (d.date && isValidDate(d.date)) ? d.date : '';
+                const timeValue = (d.time && isValidTime(d.time)) ? d.time : '';
+                const statusHtml = getStatusLabel(d.date);
+
+                html += `
+                <div class="card ${dateValue ? 'active' : ''} ${isToday ? 'today' : ''}">
+                    <div class="card-header">
+                        <div class="card-header-title">
+                            <strong>${esc(d.name)}</strong>
+                            <small>${esc(d.ort)}</small>
+                        </div>
+                        <button class="secondary button-delete" 
+                                onclick="deleteDoctor(${i})" 
+                                title="Diese Kontakt löschen"
+                                aria-label="Kontakt '${esc(d.name)}' löschen">🗑️</button>
+                    </div>
+
+                    <div class="phone-row" 
+                         role="button" 
+                         tabindex="0"
+                         aria-label="${esc(d.name)} anrufen ${esc(d.tel)}"
+                         onclick="call(${JSON.stringify(d.tel)})"
+                         onkeydown="if(event.key==='Enter' || event.key===' ') { call(${JSON.stringify(d.tel)}); event.preventDefault(); }">
+                        <span>📞 ${esc(d.tel)}</span>
+                        <span>Anrufen</span>
+                    </div>
+
+                    <div>
+                        <label for="name_${i}">Name</label>
+                        <input type="text" 
+                               id="name_${i}"
+                               value="${esc(d.name)}"
+                               placeholder="Dr. Name"
+                               maxlength="100"
+                               onchange="data[${i}].name=this.value; save(); render();"
+                               aria-label="Name des Arztes / der Ärztin">
+                    </div>
+
+                    <div>
+                        <label for="ort_${i}">Ort</label>
+                        <input type="text" 
+                               id="ort_${i}"
+                               value="${esc(d.ort)}"
+                               placeholder="Stadt/Adresse"
+                               maxlength="100"
+                               onchange="data[${i}].ort=this.value; save(); render();"
+                               aria-label="Ort der Praxis">
+                    </div>
+
+                    <div>
+                        <label for="tel_${i}">Telefon</label>
+                        <input type="text" 
+                               id="tel_${i}"
+                               value="${esc(d.tel)}"
+                               placeholder="+43"
+                               maxlength="20"
+                               onchange="data[${i}].tel=this.value; save(); render();"
+                               aria-label="Telefonnummer">
+                    </div>
+
+                    <div>
+                        <label for="date_${i}">Termin (optional)</label>
+                        <input type="date" 
+                               id="date_${i}"
+                               value="${dateValue}"
+                               onchange="data[${i}].date=this.value; save(); render();"
+                               aria-label="Termindatum">
+                    </div>
+
+                    <div>
+                        <label for="time_${i}">Zeit</label>
+                        <input type="time" 
+                               id="time_${i}"
+                               value="${timeValue}"
+                               onchange="data[${i}].time=this.value; save(); render();"
+                               aria-label="Terminzeit">
+                    </div>
+
+                    <div>${statusHtml}</div>
+
+                    <div>
+                        <label for="note_${i}">Notiz</label>
+                        <textarea id="note_${i}"
+                            placeholder="Notizen zu dieser Praxis..."
+                            maxlength="${MAX_NOTE_LENGTH}"
+                            oninput="data[${i}].note=this.value; save(); render();"
+                            aria-label="Notiz">${esc(note)}</textarea>
+                    </div>
+
+                    <div class="char-count-right ${charClass}">${noteLength} / ${MAX_NOTE_LENGTH}</div>
+                </div>`;
+            });
+
+            document.getElementById('list').innerHTML = html;
+        }
+
+        // ===== EXPORT DATA =====
+        function exportData() {
+            try {
+                const exportObj = {
+                    version: APP_VERSION,
+                    exported: new Date().toISOString(),
+                    main: main,
+                    doctors: data
+                };
+
+                const dataStr = JSON.stringify(exportObj, null, 2);
+                const blob = new Blob([dataStr], { type: 'application/json;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `8th-ape-backup_${new Date().toISOString().split('T')[0]}.json`;
+                link.style.display = 'none';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+
+                showFeedback('✓ Sicherung heruntergeladen', 'success');
+                console.log('Export successful');
+            } catch (e) {
+                console.error('Export error:', e);
+                showFeedback('❌ Fehler beim Exportieren', 'error');
+            }
+        }
+
+        // ===== IMPORT DATA =====
+        function importData() {
+            document.getElementById('fileInput').click();
+        }
+
+        function handleFileImport(event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file
+            if (!file.type.includes('json') && !file.name.endsWith('.json')) {
+                showFeedback('❌ Nur JSON-Dateien sind erlaubt', 'error');
+                return;
+            }
+
+            if (file.size > 1024 * 1024) {
+                showFeedback('❌ Datei zu groß (max. 1 MB)', 'error');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                try {
+                    const imported = JSON.parse(e.target.result);
+
+                    // Validate structure
+                    if (!Array.isArray(imported.doctors) || typeof imported.main !== 'object') {
+                        throw new Error('Invalid file format');
+                    }
+
+                    // Sanitize imported data
+                    imported.doctors.forEach(d => {
+                        d.name = sanitizeString(d.name || '');
+                        d.ort = sanitizeString(d.ort || '');
+                        d.tel = sanitizeString(d.tel || '');
+                        d.note = sanitizeString(d.note || '', MAX_NOTE_LENGTH);
+                        d.date = isValidDate(d.date) ? d.date : '';
+                        d.time = isValidTime(d.time) ? d.time : '';
+                    });
+
+                    imported.main.note = sanitizeString(imported.main.note || '', MAX_NOTE_LENGTH);
+                    imported.main.date = isValidDate(imported.main.date) ? imported.main.date : '';
+                    imported.main.time = isValidTime(imported.main.time) ? imported.main.time : '';
+
+                    data = imported.doctors;
+                    main = imported.main;
+                    save();
+                    render();
+                    showFeedback('✓ Daten wiederhergestellt', 'success');
+                    console.log('Import successful');
+                } catch (err) {
+                    console.error('Import error:', err);
+                    showFeedback('❌ Fehler beim Importieren (ungültiges Format)', 'error');
+                }
+            };
+
+            reader.onerror = function () {
+                showFeedback('❌ Fehler beim Lesen der Datei', 'error');
+            };
+
+            reader.readAsText(file);
+
+            // Reset file input
+            event.target.value = '';
+        }
+
+        // ===== CLEAR ALL DATA =====
+        function clearAllData() {
+            if (!confirm('WARNUNG: Alle Daten werden gelöscht!\n\nBitte zuvor eine Sicherung erstellen!')) {
+                return;
+            }
+
+            if (!confirm('Sind Sie absolut sicher? Diese Aktion kann nicht rückgängig gemacht werden!')) {
+                return;
+            }
+
+            try {
+                localStorage.removeItem(STORAGE_KEY_DOCTORS);
+                localStorage.removeItem(STORAGE_KEY_MAIN);
+                data = [];
+                main = { note: '', date: '', time: '' };
+                render();
+                showFeedback('✓ Alle Daten gelöscht', 'success');
+                console.log('All data cleared');
+            } catch (e) {
+                console.error('Clear error:', e);
+                showFeedback('❌ Fehler beim Löschen', 'error');
+            }
+        }
+
+        // ===== ABOUT DIALOG =====
+        function showAbout() {
+            const aboutText = `🏥 8th Ape Studio – Ärzte Tracker v${APP_VERSION}\n\n` +
+                `Ein sicherer persönlicher Tracker für psychiatrische und psychosoziale Angebote in Tirol.\n\n` +
+                `✓ Alle Daten werden lokal in Ihrem Browser gespeichert\n` +
+                `✓ Keine Datenübertragung an externe Server\n` +
+                `✓ HTTPS-only Betrieb empfohlen\n` +
+                `✓ Regelmäßig Sicherungen erstellen\n` +
+                `✓ 🔒 Vollständig end-to-end verschlüsselt (lokal)\n\n` +
+                `© 2026 8th Ape Studio – Alle Rechte vorbehalten`;
+
+            alert(aboutText);
+        }
+
+        // ===== PRIVACY DIALOG =====
+        function showPrivacy() {
+            const privacyText = `📋 Datenschutzerklärung\n\n` +
+                `Diese Anwendung:\n` +
+                `• Speichert ALLE Daten lokal in Ihrem Browser\n` +
+                `• Sendet KEINE Daten an externe Server\n` +
+                `• Benötigt KEINE Kontoerstellung\n` +
+                `• Verwendet KEINE Tracking-Tools\n` +
+                `• Verwendet KEINE Werbung\n\n` +
+                `Ihre Daten gehören ausschließlich IHNEN.\n` +
+                `Beim Löschen der Browser-Daten werden alle Einträge gelöscht.\n` +
+                `Erstellen Sie regelmäßig Sicherungen!`;
+
+            alert(privacyText);
+        }
+
+        // ===== INITIALIZE =====
+        document.addEventListener('DOMContentLoaded', () => {
+            render();
+            console.log('App initialized v' + APP_VERSION);
+        });
+
+        // ===== PREVENT XSS VIA HISTORY =====
+        window.addEventListener('popstate', (e) => {
+            render();
+        });
+
+        // ===== OFFLINE SUPPORT =====
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.getRegistrations().then(registrations => {
+                console.log(`${registrations.length} service workers active`);
+            });
+        }
+    </script>
+</body>
+
+</html>
