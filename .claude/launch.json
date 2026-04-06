@@ -1,0 +1,29 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "hot-pan",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "3000", "--directory", "C:/Users/user/AppData/Local/Temp/hotpan"],
+      "port": 3000
+    },
+    {
+      "name": "Ärzte Tracker – App (aerzte/app)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "3001", "--directory", "C:/Users/user/AppData/Local/Temp/aerzte/app"],
+      "port": 3001
+    },
+    {
+      "name": "Ärzte Tracker – Landing page (aerzte)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "3002", "--directory", "C:/Users/user/AppData/Local/Temp/aerzte"],
+      "port": 3002
+    },
+    {
+      "name": "8th Ape Studio – Homepage (ghpages)",
+      "runtimeExecutable": "python",
+      "runtimeArgs": ["-m", "http.server", "3003", "--directory", "C:/Users/user/AppData/Local/Temp/ghpages"],
+      "port": 3003
+    }
+  ]
+}

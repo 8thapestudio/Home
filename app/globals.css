@@ -1,0 +1,467 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ============================================
+   HOT PAN — Global Styles
+   Dark mode fire & iron design system
+   ============================================ */
+
+@layer base {
+  :root {
+    --color-orange:     #FF6B35;
+    --color-red:        #E63946;
+    --color-gold:       #F4A261;
+    --color-ember:      #FF8C42;
+    --color-black:      #080808;
+    --color-dark:       #0f0f0f;
+    --color-anthracite: #1a1a1a;
+    --color-cream:      #F5F0E8;
+    --color-muted:      #8A8A82;
+  }
+
+  * {
+    box-sizing: border-box;
+    padding: 0;
+    margin: 0;
+  }
+
+  html {
+    scroll-behavior: smooth;
+    -webkit-text-size-adjust: 100%;
+  }
+
+  body {
+    background-color: #080808;
+    color: #F5F0E8;
+    font-family: var(--font-inter), system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+  }
+
+  /* Focus visible for accessibility */
+  :focus-visible {
+    outline: 2px solid #FF6B35;
+    outline-offset: 3px;
+    border-radius: 2px;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: #0f0f0f;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: #FF6B35;
+    border-radius: 3px;
+  }
+
+  ::selection {
+    background-color: rgba(255, 107, 53, 0.3);
+    color: #F5F0E8;
+  }
+}
+
+/* ============================================
+   FIRE & FLAME ANIMATIONS
+   ============================================ */
+
+@layer utilities {
+  /* Metal texture overlay */
+  .metal-bg {
+    background-image:
+      repeating-linear-gradient(
+        90deg,
+        transparent,
+        transparent 2px,
+        rgba(255,255,255,0.01) 2px,
+        rgba(255,255,255,0.01) 4px
+      ),
+      repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 3px,
+        rgba(255,255,255,0.008) 3px,
+        rgba(255,255,255,0.008) 6px
+      );
+  }
+
+  /* Burned wood texture */
+  .charcoal-bg {
+    background-image:
+      radial-gradient(ellipse at 20% 50%, rgba(255,107,53,0.03) 0%, transparent 60%),
+      radial-gradient(ellipse at 80% 20%, rgba(230,57,70,0.04) 0%, transparent 50%),
+      repeating-linear-gradient(
+        45deg,
+        transparent,
+        transparent 10px,
+        rgba(255,255,255,0.005) 10px,
+        rgba(255,255,255,0.005) 20px
+      );
+  }
+
+  /* Glow text effect for headlines */
+  .text-fire {
+    background: linear-gradient(135deg, #FF6B35 0%, #F4A261 50%, #FF8C42 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  .text-fire-subtle {
+    background: linear-gradient(135deg, #F5F0E8 0%, #F4A261 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Orange glow on hover */
+  .hover-glow {
+    transition: box-shadow 0.3s ease, transform 0.2s ease;
+  }
+
+  .hover-glow:hover {
+    box-shadow: 0 0 30px rgba(255,107,53,0.4), 0 0 60px rgba(230,57,70,0.2);
+    transform: translateY(-2px);
+  }
+
+  /* Section divider with fire gradient */
+  .fire-divider {
+    height: 1px;
+    background: linear-gradient(90deg, transparent, #FF6B35 30%, #E63946 70%, transparent);
+    opacity: 0.4;
+  }
+
+  /* Iron plate surface */
+  .iron-plate {
+    background: linear-gradient(145deg, #1e1e1e 0%, #141414 50%, #1a1a1a 100%);
+    border: 1px solid rgba(255,107,53,0.12);
+  }
+
+  /* Ember glow border */
+  .ember-border {
+    border: 1px solid rgba(255, 107, 53, 0.25);
+    box-shadow: inset 0 0 20px rgba(255,107,53,0.05);
+  }
+}
+
+/* ============================================
+   FLAME SVG COMPONENT
+   ============================================ */
+
+.flame-container {
+  position: relative;
+  display: inline-block;
+}
+
+.flame-shape {
+  animation: flame 2s ease-in-out infinite alternate;
+  transform-origin: bottom center;
+  filter: blur(0.5px);
+}
+
+.flame-inner {
+  animation: flame 1.5s ease-in-out infinite alternate-reverse;
+  transform-origin: bottom center;
+}
+
+/* ============================================
+   EMBER PARTICLES
+   ============================================ */
+
+.ember {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #FF8C42 0%, #FF6B35 60%, transparent 100%);
+  pointer-events: none;
+}
+
+.ember-1 { animation: emberFloat 3.5s ease-in-out infinite; animation-delay: 0s; }
+.ember-2 { animation: emberFloat 4.2s ease-in-out infinite; animation-delay: 0.8s; }
+.ember-3 { animation: emberFloat 3.8s ease-in-out infinite; animation-delay: 1.6s; }
+.ember-4 { animation: emberFloat 4.5s ease-in-out infinite; animation-delay: 0.4s; }
+.ember-5 { animation: emberFloat 3.2s ease-in-out infinite; animation-delay: 2.1s; }
+
+/* ============================================
+   HEAT SHIMMER EFFECT
+   ============================================ */
+
+.heat-shimmer-overlay {
+  position: absolute;
+  inset: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent 0%,
+    rgba(255,107,53,0.02) 20%,
+    transparent 40%
+  );
+  background-size: 100% 8px;
+  animation: heatScroll 4s linear infinite;
+  pointer-events: none;
+}
+
+@keyframes heatScroll {
+  0%   { background-position: 0 0; }
+  100% { background-position: 0 -100px; }
+}
+
+/* ============================================
+   SMOKE ANIMATION
+   ============================================ */
+
+.smoke-particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(180,180,180,0.12) 0%, transparent 70%);
+  animation: smokeRise 6s ease-out infinite;
+  pointer-events: none;
+}
+
+@keyframes smokeRise {
+  0%   { transform: translateY(0) scale(0.5) translateX(0); opacity: 0.6; }
+  50%  { transform: translateY(-80px) scale(1.5) translateX(20px); opacity: 0.3; }
+  100% { transform: translateY(-160px) scale(2.5) translateX(-10px); opacity: 0; }
+}
+
+/* ============================================
+   BUTTON STYLES
+   ============================================ */
+
+@layer components {
+  .btn-fire {
+    @apply relative inline-flex items-center justify-center gap-2
+           bg-hp-orange text-hp-black font-semibold
+           rounded-full overflow-hidden
+           transition-all duration-300 ease-fire
+           min-h-[52px] px-8 text-base
+           select-none cursor-pointer;
+    box-shadow: 0 0 0 0 rgba(255,107,53,0);
+  }
+
+  .btn-fire::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: linear-gradient(135deg, #FF8C42, #E63946);
+  }
+
+  .btn-fire:hover::before {
+    @apply opacity-100;
+  }
+
+  .btn-fire:hover {
+    box-shadow: 0 0 30px rgba(255,107,53,0.5), 0 4px 20px rgba(0,0,0,0.4);
+    transform: translateY(-1px) scale(1.02);
+  }
+
+  .btn-fire:active {
+    transform: translateY(0) scale(0.98);
+    box-shadow: 0 0 15px rgba(255,107,53,0.3);
+  }
+
+  .btn-fire span {
+    @apply relative z-10;
+  }
+
+  .btn-outline-fire {
+    @apply relative inline-flex items-center justify-center gap-2
+           border border-hp-orange text-hp-orange bg-transparent
+           font-semibold rounded-full overflow-hidden
+           transition-all duration-300
+           min-h-[52px] px-8 text-base
+           select-none cursor-pointer;
+  }
+
+  .btn-outline-fire:hover {
+    @apply bg-hp-orange text-hp-black;
+    box-shadow: 0 0 25px rgba(255,107,53,0.4);
+    transform: translateY(-1px);
+  }
+
+  /* Section headings */
+  .section-label {
+    @apply text-hp-orange uppercase tracking-[0.3em] text-xs font-semibold mb-3;
+    font-family: var(--font-inter), sans-serif;
+  }
+
+  .section-title {
+    @apply font-display text-4xl md:text-5xl lg:text-6xl font-bold text-hp-cream leading-tight;
+  }
+
+  /* Card base */
+  .card-iron {
+    @apply rounded-2xl overflow-hidden
+           border border-white/5
+           transition-all duration-300;
+    background: linear-gradient(145deg, #1a1a1a 0%, #111111 100%);
+  }
+
+  .card-iron:hover {
+    border-color: rgba(255,107,53,0.2);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6), 0 0 20px rgba(255,107,53,0.08);
+    transform: translateY(-4px);
+  }
+
+  /* Filter pill */
+  .filter-pill {
+    @apply inline-flex items-center gap-1.5 px-4 py-2
+           rounded-full text-sm font-medium
+           transition-all duration-200 cursor-pointer
+           border border-white/10 text-hp-muted
+           min-h-[44px];
+  }
+
+  .filter-pill:hover,
+  .filter-pill.active {
+    @apply border-hp-orange text-hp-orange bg-hp-orange/10;
+  }
+
+  /* Input styles */
+  .input-iron {
+    @apply w-full bg-hp-anthracite border border-white/10 rounded-xl
+           px-4 py-3 text-hp-cream placeholder-hp-muted/60
+           focus:outline-none focus:border-hp-orange/50
+           transition-colors duration-200
+           min-h-[52px] text-base;
+  }
+
+  /* Zone card */
+  .zone-card {
+    @apply relative rounded-2xl overflow-hidden cursor-pointer
+           border-2 border-transparent
+           transition-all duration-300;
+    background: linear-gradient(145deg, #1a1a1a, #111111);
+  }
+
+  .zone-card.selected,
+  .zone-card:hover {
+    border-color: #FF6B35;
+    box-shadow: 0 0 25px rgba(255,107,53,0.2);
+  }
+}
+
+/* ============================================
+   VIDEO HERO OVERLAY
+   ============================================ */
+
+.hero-video-overlay {
+  background: linear-gradient(
+    to bottom,
+    rgba(8,8,8,0.3) 0%,
+    rgba(8,8,8,0.1) 30%,
+    rgba(8,8,8,0.5) 70%,
+    rgba(8,8,8,0.95) 100%
+  );
+}
+
+/* ============================================
+   SCROLL-TRIGGERED REVEAL
+   ============================================ */
+
+.reveal {
+  opacity: 0;
+  transform: translateY(30px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-left {
+  opacity: 0;
+  transform: translateX(-40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal-left.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.reveal-right {
+  opacity: 0;
+  transform: translateX(40px);
+  transition: opacity 0.7s ease, transform 0.7s ease;
+}
+
+.reveal-right.visible {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+/* ============================================
+   MENU ITEM IMAGE
+   ============================================ */
+
+.menu-item-img {
+  transition: transform 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.menu-item-img:hover .menu-item-img-inner {
+  transform: scale(1.06);
+}
+
+/* ============================================
+   SOCIAL GRID
+   ============================================ */
+
+.ugc-grid-item {
+  @apply relative overflow-hidden rounded-2xl cursor-pointer;
+  aspect-ratio: 1;
+}
+
+.ugc-grid-item::after {
+  content: '';
+  @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+  background: linear-gradient(135deg, rgba(255,107,53,0.3), rgba(230,57,70,0.2));
+}
+
+.ugc-grid-item:hover::after {
+  @apply opacity-100;
+}
+
+/* ============================================
+   MOBILE TOUCH IMPROVEMENTS
+   ============================================ */
+
+@media (max-width: 768px) {
+  .btn-fire,
+  .btn-outline-fire {
+    min-height: 56px;
+    font-size: 1rem;
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+
+  .filter-pill {
+    min-height: 48px;
+    font-size: 0.875rem;
+  }
+}
+
+/* ============================================
+   REDUCED MOTION SUPPORT
+   ============================================ */
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+
+  .reveal,
+  .reveal-left,
+  .reveal-right {
+    opacity: 1;
+    transform: none;
+  }
+}
