@@ -152,7 +152,7 @@
       letter-spacing: 0;
       color: var(--cyan);
       text-shadow: 0 0 30px rgba(0,245,255,.5), 0 0 60px rgba(0,245,255,.2);
-      tabular-nums: normal;
+      font-variant-numeric: tabular-nums;
     }
     .clock-digits.off {
       color: rgba(110,122,150,.4);
@@ -252,7 +252,8 @@
     .pill.active-purple { border-color: #a78bfa;        background: rgba(167,139,250,.08);color: #a78bfa; }
     .pill.active-red    { border-color: #f87171;        background: rgba(248,113,113,.08); color: #f87171; }
     .pill.active-blue   { border-color: #60a5fa;        background: rgba(96,165,250,.08);  color: #60a5fa; }
-    .pill:hover:not(.active-cyan):not(.active-mag):not(.active-amber):not(.active-purple):not(.active-red):not(.active-blue) {
+    .pill.active-green  { border-color: #34d399;        background: rgba(52,211,153,.08);  color: #34d399; }
+    .pill:hover:not(.active-cyan):not(.active-mag):not(.active-amber):not(.active-purple):not(.active-red):not(.active-blue):not(.active-green) {
       border-color: rgba(0,245,255,.2); color: var(--text);
     }
 
@@ -373,6 +374,9 @@
       afternoon: { label:'Afternoon', Icon: Sunset,   pillClass:'active-cyan',   color:'#00f5ff', border:'rgba(0,245,255,.3)'   },
       split:     { label:'Split',     Icon: Scissors, pillClass:'active-purple', color:'#a78bfa', border:'rgba(167,139,250,.3)' },
       sick:      { label:'Sick',      Icon: Activity, pillClass:'active-red',    color:'#f87171', border:'rgba(248,113,113,.3)' },
+      vacation:  { label:'Vacation',  Icon: Star,     pillClass:'active-green',  color:'#34d399', border:'rgba(52,211,153,.3)'  },
+      holiday:   { label:'Holiday',   Icon: Star,     pillClass:'active-blue',   color:'#60a5fa', border:'rgba(96,165,250,.3)'  },
+      ot_used:   { label:'OT Used',   Icon: Minus,    pillClass:'active-mag',    color:'#ff2d78', border:'rgba(255,45,120,.3)'  },
       special:   { label:'Special',   Icon: Star,     pillClass:'active-blue',   color:'#60a5fa', border:'rgba(96,165,250,.3)'  },
     };
 
@@ -585,19 +589,22 @@
     }
 
     // ── MANUAL FORM ────────────────────────────────────────────────────────────
-    const mkForm = ()=>({ date:todayStr(), type:'actual', category:'morning', segs:[{start:'08:00',end:'16:00'}], note:'' });
+    const mkForm = ()=>({ date:todayStr(), type:'actual', category:'morning', segs:[{start:'08:00',end:'16:00'}], note:'', overtimeH:0 });
 
     function ManualForm({ onSave }) {
       const [f,setF] = useState(mkForm);
       const [saved,setSaved] = useState(false);
       const set = (k,v) => setF(p=>({...p,[k]:v}));
       const isAbsence = f.type==='absence';
-      const cats = isAbsence?['sick','special']:['morning','afternoon','split'];
+      const cats = isAbsence?['sick','vacation','holiday','ot_used','special']:['morning','afternoon','split'];
 
       const doSave = ()=>{
         const segs = isAbsence?[]:f.segs;
-        const dur  = segs.length?calcDuration(segs):null;
-        onSave({ id:`r_${Date.now()}`, date:f.date, type:f.type, category:f.category, segments:segs, note:f.note.trim(), source:'manual', durationMinutes:dur });
+        const dur  = f.category==='ot_used'
+          ? Math.round(f.overtimeH*60)
+          : segs.length?calcDuration(segs):null;
+        const otMins = (!isAbsence && f.overtimeH>0) ? Math.round(f.overtimeH*60) : 0;
+        onSave({ id:`r_${Date.now()}`, date:f.date, type:f.type, category:f.category, segments:segs, note:f.note.trim(), source:'manual', durationMinutes:dur, overtimeMinutes:otMins });
         setSaved(true);
         setTimeout(()=>{ setSaved(false); setF(mkForm()); },1500);
       };
@@ -639,6 +646,26 @@
                 Time Segments{f.category==='split'&&<span style={{ color:'#a78bfa', marginLeft:'.5rem', opacity:.7 }}>· split</span>}
               </label>
               <SegEditor segs={f.segs} onChange={v=>set('segs',v)} />
+            </div>
+          )}
+
+          {(!isAbsence || f.category==='ot_used') && (
+            <div>
+              <label className="field-label">
+                {f.category==='ot_used'
+                  ? <>OT Hours Used <span style={{ opacity:.4, textTransform:'none', letterSpacing:0 }}>(odečíst z banku)</span></>
+                  : <>Overtime Hours <span style={{ opacity:.4, textTransform:'none', letterSpacing:0 }}>(přesčasy z této směny)</span></>
+                }
+              </label>
+              <div style={{ display:'flex', flexWrap:'wrap', gap:'.4rem' }}>
+                {[0,.5,1,1.5,2,2.5,3,4,6,8].map(h=>(
+                  <button key={h} className={cn('pill', f.overtimeH===h?'active-mag':'')}
+                    style={{ flex:'none', padding:'.4rem .55rem', fontSize:'.7rem' }}
+                    onClick={()=>set('overtimeH',h)}>
+                    {h===0?'—':`${h}h`}
+                  </button>
+                ))}
+              </div>
             </div>
           )}
 
@@ -900,11 +927,15 @@
     function StatsTab({ records }) {
       const now=new Date();
       const totals=useMemo(()=>{
-        const actual =records.filter(r=>r.type==='actual' &&r.durationMinutes!=null).reduce((s,r)=>s+r.durationMinutes,0);
-        const planned=records.filter(r=>r.type==='planned'&&r.durationMinutes!=null).reduce((s,r)=>s+r.durationMinutes,0);
-        const sick   =records.filter(r=>r.category==='sick').length;
-        const special=records.filter(r=>r.category==='special').length;
-        return{actual,planned,balance:actual-planned,sick,special};
+        const actual  =records.filter(r=>r.type==='actual' &&r.durationMinutes!=null).reduce((s,r)=>s+r.durationMinutes,0);
+        const planned =records.filter(r=>r.type==='planned'&&r.durationMinutes!=null).reduce((s,r)=>s+r.durationMinutes,0);
+        const otEarned=records.filter(r=>r.type==='actual' &&r.overtimeMinutes>0).reduce((s,r)=>s+(r.overtimeMinutes||0),0);
+        const otUsed  =records.filter(r=>r.type==='absence'&&r.category==='ot_used').reduce((s,r)=>s+(r.durationMinutes||480),0);
+        const sick    =records.filter(r=>r.category==='sick').length;
+        const vacation=records.filter(r=>r.category==='vacation').length;
+        const holiday =records.filter(r=>r.category==='holiday').length;
+        const special =records.filter(r=>r.category==='special').length;
+        return{actual,planned,balance:actual-planned,otEarned,otUsed,otBank:otEarned-otUsed,sick,vacation,holiday,special};
       },[records]);
 
       const weekData=useMemo(()=>Array.from({length:8},(_,i)=>{
@@ -950,9 +981,31 @@
             </div>
           </div>
 
-          {(totals.sick>0||totals.special>0)&&(
+          {(totals.otEarned>0||totals.otUsed>0)&&(()=>{
+            const bank=totals.otBank/60;
+            const isPos=bank>0.05, isNeg=bank<-0.05;
+            return(
+            <div className="section-card" style={{ borderColor:'rgba(255,45,120,.2)', background:'rgba(255,45,120,.03)' }}>
+              <div style={{ display:'flex', alignItems:'center', gap:'.5rem', marginBottom:'.5rem' }}>
+                <Minus size={14} style={{color:'var(--magenta)'}}/>
+                <span style={{ fontSize:'.6rem', fontWeight:700, letterSpacing:'.15em', textTransform:'uppercase', color:'var(--muted)' }}>Overtime Bank</span>
+              </div>
+              <div style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:isPos?'#34d399':isNeg?'#f87171':'var(--muted)' }}>
+                {bank>=0?'+':''}{bank.toFixed(1)}h
+              </div>
+              <div style={{ display:'flex', gap:'2rem', marginTop:'.75rem', paddingTop:'.75rem', borderTop:'1px solid var(--border)' }}>
+                <div><p style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Earned</p><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, color:'var(--magenta)' }}>+{(totals.otEarned/60).toFixed(1)}h</p></div>
+                <div><p style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Used</p><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, color:'var(--muted)' }}>-{(totals.otUsed/60).toFixed(1)}h</p></div>
+              </div>
+            </div>
+            );
+          })()}
+
+          {(totals.sick>0||totals.vacation>0||totals.holiday>0||totals.special>0)&&(
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'.75rem' }}>
               {totals.sick>0&&<div className="section-card" style={{ borderColor:'rgba(248,113,113,.2)', background:'rgba(248,113,113,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Activity size={12} style={{color:'#f87171'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Sick</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#f87171' }}>{totals.sick}</p></div>}
+              {totals.vacation>0&&<div className="section-card" style={{ borderColor:'rgba(52,211,153,.2)', background:'rgba(52,211,153,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Star size={12} style={{color:'#34d399'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Vacation</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#34d399' }}>{totals.vacation}</p></div>}
+              {totals.holiday>0&&<div className="section-card" style={{ borderColor:'rgba(96,165,250,.2)', background:'rgba(96,165,250,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Star size={12} style={{color:'#60a5fa'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Holiday</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#60a5fa' }}>{totals.holiday}</p></div>}
               {totals.special>0&&<div className="section-card" style={{ borderColor:'rgba(96,165,250,.2)', background:'rgba(96,165,250,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Star size={12} style={{color:'#60a5fa'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Special</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#60a5fa' }}>{totals.special}</p></div>}
             </div>
           )}
