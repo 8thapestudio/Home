@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="theme-color" content="#0a0a0a" />
+  <title>TrueHours · Kitchen Noir</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { mono: ['"JetBrains Mono"', '"Fira Code"', 'ui-monospace', 'monospace'] }
+        }
+      }
+    }
+  </script>
+
+  <script type="importmap">
+  {
+    "imports": {
+      "react":            "https://esm.sh/react@18",
+      "react/jsx-runtime":"https://esm.sh/react@18/jsx-runtime",
+      "react-dom/client": "https://esm.sh/react-dom@18/client",
+      "date-fns":         "https://esm.sh/date-fns@3",
+      "motion/react":     "https://esm.sh/motion/react?deps=react@18",
+      "lucide-react":     "https://esm.sh/lucide-react?deps=react@18",
+      "recharts":         "https://esm.sh/recharts?deps=react@18,react-dom@18"
+    }
+  }
+  </script>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; background: #0a0a0a; height: 100%; }
+    body { color: #fafafa; -webkit-font-smoothing: antialiased; overflow: hidden; }
+    #root { height: 100dvh; overflow: hidden; }
+
+    .no-scroll::-webkit-scrollbar { display: none; }
+    .no-scroll { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .pt-safe { padding-top: max(1.75rem, env(safe-area-inset-top)); }
+    .pb-safe { padding-bottom: max(0.75rem, env(safe-area-inset-bottom)); }
+
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator { filter: invert(0.4); }
+
+    @keyframes shift-glow {
+      0%,100% { box-shadow: 0 0 24px rgba(249,115,22,.18), 0 0 48px rgba(249,115,22,.08); }
+      50%      { box-shadow: 0 0 36px rgba(249,115,22,.38), 0 0 72px rgba(249,115,22,.16); }
+    }
+    .shift-active { animation: shift-glow 2.8s ease-in-out infinite; }
+    .spin { animation: spin 1s linear infinite; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+  <div id="root"></div>
+
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+  <script type="text/babel" data-type="module">
+    import React, { useState, useEffect, useCallback, useMemo, useRef } from 'react';
+    import { createRoot } from 'react-dom/client';
+    import {
+      format, parseISO,
+      startOfMonth, endOfMonth, eachDayOfInterval,
+      isToday, isWeekend, getDay,
+      startOfWeek, subWeeks, addMonths, subMonths,
+    } from 'date-fns';
+    import { motion, AnimatePresence } from 'motion/react';
+    import {
+      Clock, PenLine, CalendarDays, BarChart3,
+      LogIn, LogOut, Flame, AlertTriangle,
+      ChevronLeft, ChevronRight, Zap,
+      TrendingUp, TrendingDown, Minus,
+      Plus, X, Upload, FileText, Info,
+      CheckCircle2, Sun, Sunset, Scissors, Activity, Star,
+    } from 'lucide-react';
+    import {
+      BarChart, Bar, XAxis, YAxis,
+      CartesianGrid, Tooltip, ResponsiveContainer,
+    } from 'recharts';
+
+    // ── CONSTANTS ──────────────────────────────────────────────────────────────
+    const KEYS = { RECORDS: 'cs_records', ACTIVE: 'cs_active', GEMINI: 'cs_gemini' };
+
+    const CATS = {
+      morning:   { label: 'Morning',   Icon: Sun,      color: 'text-amber-400',  bg: 'bg-amber-500/10  border-amber-500/20'  },
+      afternoon: { label: 'Afternoon', Icon: Sunset,   color: 'text-orange-400', bg: 'bg-orange-500/10 border-orange-500/20' },
+      split:     { label: 'Split',     Icon: Scissors, color: 'text-purple-400', bg: 'bg-purple-500/10 border-purple-500/20' },
+      sick:      { label: 'Sick',      Icon: Activity, color: 'text-red-400',    bg: 'bg-red-500/10    border-red-500/20'    },
+      special:   { label: 'Special',   Icon: Star,     color: 'text-blue-400',   bg: 'bg-blue-500/10   border-blue-500/20'   },
+    };
+
+    // ── UTILS ──────────────────────────────────────────────────────────────────
+    const cn      = (...c) => c.filter(Boolean).join(' ');
+    const pad2    = n => String(n).padStart(2, '0');
+    const toH     = m => (m / 60).toFixed(1);
+    const todayStr = () => format(new Date(), 'yyyy-MM-dd');
+    const nowTime  = () => format(new Date(), 'HH:mm');
+
+    const timeToMins = t => { const [h, m] = t.split(':').map(Number); return h * 60 + m; };
+    const calcDuration = segs => segs.reduce((tot, s) => {
+      let a = timeToMins(s.start), b = timeToMins(s.end);
+      if (b < a) b += 1440;
+      return tot + (b - a);
+    }, 0);
+
+    const fmtMins   = m => { if (!m) return '0h'; const h = Math.floor(m/60), r = m%60; return r ? `${h}h ${r}m` : `${h}h`; };
+    const fmtElapsed = s => `${pad2(Math.floor(s/3600))}:${pad2(Math.floor(s%3600/60))}:${pad2(s%60)}`;
+
+    const load = (k, fb) => { try { const v = localStorage.getItem(k); return v ? JSON.parse(v) : fb; } catch { return fb; } };
+    const save = (k, v) => localStorage.setItem(k, JSON.stringify(v));
+
+    // ── HOOK ───────────────────────────────────────────────────────────────────
+    function useLS(key, fallback) {
+      const [val, setVal] = useState(() => load(key, fallback));
+      const set = useCallback(u => {
+        setVal(prev => { const next = typeof u === 'function' ? u(prev) : u; save(key, next); return next; });
+      }, [key]);
+      return [val, set];
+    }
+
+    // ── SHARED UI ──────────────────────────────────────────────────────────────
+    function ConfirmModal({ open, title, sub, okLabel, danger, onOk, onCancel }) {
+      if (!open) return null;
+      return (
+        <motion.div initial={{ opacity:0 }} animate={{ opacity:1 }} exit={{ opacity:0 }}
+          className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-4 bg-black/80 backdrop-blur-sm"
+          onClick={onCancel}>
+          <motion.div
+            initial={{ y:72, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:72, opacity:0 }}
+            transition={{ type:'spring', damping:28, stiffness:300 }}
+            className="w-full max-w-sm bg-zinc-900 border border-zinc-700/80 rounded-2xl p-6 shadow-2xl"
+            onClick={e => e.stopPropagation()}>
+            <div className="flex items-start gap-3 mb-5">
+              <AlertTriangle className="w-5 h-5 text-amber-400 flex-shrink-0 mt-0.5" />
+              <div>
+                <p className="text-zinc-100 font-semibold">{title}</p>
+                {sub && <p className="text-zinc-500 text-sm mt-1">{sub}</p>}
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <button onClick={onCancel} className="py-3.5 rounded-xl border border-zinc-700 text-zinc-400 font-medium hover:bg-zinc-800 transition-colors">Cancel</button>
+              <button onClick={onOk} className={cn('py-3.5 rounded-xl font-bold transition-all active:scale-95', danger ? 'bg-red-500 hover:bg-red-400 text-white' : 'bg-orange-500 hover:bg-orange-400 text-white')}>
+                {okLabel}
+              </button>
+            </div>
+          </motion.div>
+        </motion.div>
+      );
+    }
+
+    function CatBadge({ cat }) {
+      const c = CATS[cat]; if (!c) return null;
+      const Icon = c.Icon;
+      return (
+        <span className={cn('inline-flex items-center gap-1 px-2 py-0.5 rounded-lg border text-xs font-medium flex-shrink-0', c.bg, c.color)}>
+          <Icon className="w-3 h-3" />{c.label}
+        </span>
+      );
+    }
+
+    function SegPill({ seg }) {
+      const dur = calcDuration([seg]);
+      return (
+        <span className="inline-flex items-center gap-1 bg-zinc-800 border border-zinc-700 rounded-lg px-2 py-0.5 text-xs font-mono text-zinc-300">
+          {seg.start}→{seg.end}<span className="text-orange-400 ml-0.5">{fmtMins(dur)}</span>
+        </span>
+      );
+    }
+
+    // ── TIMER TAB ──────────────────────────────────────────────────────────────
+    function TimerTab({ records, active, onIn, onOut }) {
+      const [, tick] = useState(0);
+      const [modal, setModal] = useState(null);
+
+      useEffect(() => {
+        if (!active) return;
+        const id = setInterval(() => tick(t => t + 1), 1000);
+        return () => clearInterval(id);
+      }, [active]);
+
+      const recent = useMemo(() =>
+        [...records].filter(r => r.type === 'actual').reverse().slice(0, 5), [records]);
+
+      const elapsed = active ? Math.floor((Date.now() - new Date(active.checkIn).getTime()) / 1000) : 0;
+      const now = new Date();
+
+      return (
+        <div className="space-y-4">
+          {/* Status Card */}
+          <div className={cn('rounded-2xl border p-6 transition-all duration-700',
+            active ? 'border-orange-500/40 bg-orange-500/[0.04] shift-active' : 'border-zinc-800 bg-zinc-900/80')}>
+            <div className="flex items-center justify-between mb-6">
+              <div className="flex items-center gap-2.5">
+                <span className={cn('w-2 h-2 rounded-full inline-block', active ? 'bg-orange-500 animate-pulse' : 'bg-zinc-800')} />
+                <span className="text-[10px] font-mono tracking-[.18em] text-zinc-600 uppercase">{active ? 'Shift Active' : 'Off Duty'}</span>
+              </div>
+              <Flame className={cn('w-5 h-5', active ? 'text-orange-500' : 'text-zinc-800')} />
+            </div>
+            <div className="text-center">
+              <div className={cn('font-mono font-bold tabular-nums tracking-tight text-7xl', active ? 'text-orange-400' : 'text-zinc-800')}>
+                {active ? fmtElapsed(elapsed) : '--:--:--'}
+              </div>
+              <p className="text-zinc-600 text-sm mt-3 font-mono">
+                {active ? `Started ${format(new Date(active.checkIn), 'HH:mm')} · ${format(new Date(active.checkIn), 'EEE d MMM')}` : format(now, 'EEEE, MMMM d')}
+              </p>
+            </div>
+          </div>
+
+          {/* CTA */}
+          <button onClick={() => setModal(active ? 'out' : 'in')}
+            className={cn('w-full py-5 rounded-2xl text-lg font-bold flex items-center justify-center gap-3 transition-all active:scale-[.97]',
+              active ? 'border-2 border-red-500/40 bg-red-500/10 text-red-400 hover:bg-red-500/15'
+                     : 'bg-orange-500 hover:bg-orange-400 text-white shadow-lg shadow-orange-500/20')}>
+            {active ? <><LogOut className="w-5 h-5" />Check Out</> : <><LogIn className="w-5 h-5" />Check In</>}
+          </button>
+
+          {/* Recent */}
+          {recent.length > 0 && (
+            <div>
+              <p className="text-[10px] font-mono tracking-[.18em] text-zinc-700 uppercase mb-3">Recent Shifts</p>
+              <div className="space-y-2">
+                {recent.map(r => (
+                  <div key={r.id} className="bg-zinc-900 border border-zinc-800/80 rounded-xl px-4 py-3 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2 flex-wrap">
+                          <p className="text-sm text-zinc-300">{format(parseISO(r.date), 'EEE, MMM d')}</p>
+                          <CatBadge cat={r.category} />
+                        </div>
+                      </div>
+                      {r.durationMinutes != null && <span className="font-mono font-bold text-sm text-orange-400">{toH(r.durationMinutes)}h</span>}
+                    </div>
+                    {r.segments?.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {r.segments.map((s, i) => (
+                          <React.Fragment key={i}>
+                            <SegPill seg={s} />
+                            {i < r.segments.length - 1 && r.category === 'split' && (
+                              <span className="text-xs text-zinc-700 font-mono flex items-center px-1">⋯ pause ⋯</span>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}
+                    {r.note && <div className="flex items-center gap-1.5 text-xs text-zinc-600"><Info className="w-3 h-3 flex-shrink-0" />{r.note}</div>}
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {!active && recent.length === 0 && (
+            <div className="text-center py-10 text-zinc-700">
+              <Clock className="w-10 h-10 mx-auto mb-3 opacity-20" />
+              <p className="text-sm font-mono">No shifts logged yet</p>
+            </div>
+          )}
+
+          <AnimatePresence>
+            {modal && (
+              <ConfirmModal open title={modal === 'in' ? 'Check In?' : 'Check Out?'}
+                sub={modal === 'in' ? `Start shift at ${format(now, 'HH:mm')}` : `End shift after ${fmtElapsed(elapsed)}`}
+                okLabel={modal === 'in' ? 'Start Shift' : 'End Shift'} danger={modal === 'out'}
+                onOk={() => { modal === 'in' ? onIn() : onOut(); setModal(null); }}
+                onCancel={() => setModal(null)} />
+            )}
+          </AnimatePresence>
+        </div>
+      );
+    }
+
+    // ── SEGMENT EDITOR ─────────────────────────────────────────────────────────
+    function SegEditor({ segs, onChange }) {
+      const add    = ()        => onChange([...segs, { start: '08:00', end: '16:00' }]);
+      const remove = i         => onChange(segs.filter((_, j) => j !== i));
+      const upd    = (i, f, v) => onChange(segs.map((s, j) => j === i ? { ...s, [f]: v } : s));
+
+      return (
+        <div className="space-y-2">
+          {segs.map((seg, i) => (
+            <div key={i} className="flex items-center gap-2">
+              <div className="flex-1 grid grid-cols-2 gap-2">
+                <input type="time" value={seg.start} onChange={e => upd(i, 'start', e.target.value)}
+                  className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-zinc-200 focus:outline-none focus:border-orange-500/60 w-full" />
+                <input type="time" value={seg.end}   onChange={e => upd(i, 'end',   e.target.value)}
+                  className="bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm font-mono text-zinc-200 focus:outline-none focus:border-orange-500/60 w-full" />
+              </div>
+              {segs.length > 1 && (
+                <button onClick={() => remove(i)} className="p-2 rounded-lg text-zinc-600 hover:text-red-400 hover:bg-red-500/10 transition-colors flex-shrink-0"><X className="w-4 h-4" /></button>
+              )}
+            </div>
+          ))}
+          {segs.length < 3 && (
+            <button onClick={add} className="text-xs font-mono text-orange-400/60 hover:text-orange-400 flex items-center gap-1 transition-colors mt-1">
+              <Plus className="w-3 h-3" />Add segment
+            </button>
+          )}
+        </div>
+      );
+    }
+
+    // ── MANUAL FORM ────────────────────────────────────────────────────────────
+    const mkForm = () => ({ date: todayStr(), type: 'actual', category: 'morning', segs: [{ start: '08:00', end: '16:00' }], note: '' });
+
+    function ManualForm({ onSave }) {
+      const [f, setF]    = useState(mkForm);
+      const [saved, setSaved] = useState(false);
+      const set = (k, v) => setF(p => ({ ...p, [k]: v }));
+
+      const isAbsence = f.type === 'absence';
+      const cats = isAbsence ? ['sick', 'special'] : ['morning', 'afternoon', 'split'];
+
+      const save = () => {
+        const segs = isAbsence ? [] : f.segs;
+        const dur  = segs.length ? calcDuration(segs) : null;
+        onSave({ id: `r_${Date.now()}`, date: f.date, type: f.type, category: f.category, segments: segs, note: f.note.trim(), source: 'manual', durationMinutes: dur });
+        setSaved(true);
+        setTimeout(() => { setSaved(false); setF(mkForm()); }, 1500);
+      };
+
+      return (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+          <div className="flex items-center gap-2">
+            <PenLine className="w-4 h-4 text-orange-400" />
+            <h3 className="text-sm font-bold text-zinc-200">Manual Entry</h3>
+          </div>
+
+          {/* Date */}
+          <div>
+            <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 block mb-1.5">Date</label>
+            <input type="date" value={f.date} onChange={e => set('date', e.target.value)}
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm font-mono text-zinc-200 focus:outline-none focus:border-orange-500/60" />
+          </div>
+
+          {/* Type */}
+          <div>
+            <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 block mb-1.5">Type</label>
+            <div className="grid grid-cols-3 gap-2">
+              {['actual','planned','absence'].map(t => (
+                <button key={t} onClick={() => { set('type', t); set('category', t === 'absence' ? 'sick' : 'morning'); }}
+                  className={cn('py-2 rounded-lg text-xs font-mono font-medium capitalize transition-all', f.type === t ? 'bg-orange-500 text-white' : 'bg-zinc-800 text-zinc-500 hover:text-zinc-300')}>
+                  {t}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* Category */}
+          <div>
+            <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 block mb-1.5">Category</label>
+            <div className="grid grid-cols-3 gap-2">
+              {cats.map(c => {
+                const cat = CATS[c];
+                return (
+                  <button key={c} onClick={() => set('category', c)}
+                    className={cn('py-2 rounded-lg text-xs font-mono font-medium transition-all',
+                      f.category === c ? cn('border', cat.bg, cat.color) : 'bg-zinc-800 text-zinc-500 hover:text-zinc-300')}>
+                    {cat.label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Segments */}
+          {!isAbsence && (
+            <div>
+              <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 block mb-1.5">
+                Time Segments
+                {f.category === 'split' && <span className="ml-2 text-purple-400/70">· split shift</span>}
+              </label>
+              <SegEditor segs={f.segs} onChange={v => set('segs', v)} />
+            </div>
+          )}
+
+          {/* Note */}
+          <div>
+            <label className="text-[10px] font-mono uppercase tracking-widest text-zinc-600 block mb-1.5">Note <span className="text-zinc-700 normal-case">(optional)</span></label>
+            <input type="text" value={f.note} onChange={e => set('note', e.target.value)} placeholder="e.g. doctor visit, overtime…"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:border-orange-500/60" />
+          </div>
+
+          <button onClick={save}
+            className={cn('w-full py-3.5 rounded-xl font-bold text-sm transition-all active:scale-[.98]',
+              saved ? 'bg-emerald-600 text-white' : 'bg-orange-500 hover:bg-orange-400 text-white')}>
+            {saved ? '✓ Saved' : 'Save Record'}
+          </button>
+        </div>
+      );
+    }
+
+    // ── AI PARSER ──────────────────────────────────────────────────────────────
+    function AIParser({ onImport }) {
+      const [apiKey, setApiKey] = useLS(KEYS.GEMINI, '');
+      const [showKey, setShowKey]  = useState(false);
+      const [file, setFile]        = useState(null);
+      const [loading, setLoading]  = useState(false);
+      const [parsed, setParsed]    = useState(null);
+      const [err, setErr]          = useState('');
+      const fileRef = useRef();
+
+      const handleFile = e => {
+        const f = e.dataTransfer?.files?.[0] || e.target?.files?.[0];
+        if (f) { setFile(f); setParsed(null); setErr(''); }
+      };
+
+      const readB64  = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result.split(',')[1]); r.onerror = rej; r.readAsDataURL(f); });
+      const readText = f => new Promise((res, rej) => { const r = new FileReader(); r.onload = () => res(r.result); r.onerror = rej; r.readAsText(f); });
+
+      const parse = async () => {
+        if (!apiKey) { setErr('Enter Gemini API key first.'); return; }
+        if (!file)   { setErr('Drop a file first.'); return; }
+        setLoading(true); setErr('');
+        const today = todayStr();
+        const prompt = `You are a kitchen work schedule parser. Extract all shifts from the document.
+Return ONLY a JSON array (no markdown): [{"date":"YYYY-MM-DD","category":"morning"|"afternoon"|"split"|"sick"|"special","segments":[{"start":"HH:mm","end":"HH:mm"}],"note":""}]
+Rules: Use year from context or current year. Empty segments [] for sick/special. Split shifts have 2 segments. 24h format. Today: ${today}.`;
+        try {
+          const isImg = file.type.startsWith('image/');
+          const parts = isImg
+            ? [{ inline_data: { mime_type: file.type, data: await readB64(file) } }, { text: prompt }]
+            : [{ text: `${prompt}\n\nDocument:\n${await readText(file)}` }];
+          const res = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`,
+            { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ contents:[{ parts }] }) });
+          if (!res.ok) throw new Error(`API ${res.status}`);
+          const data = await res.json();
+          const txt  = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+          const m    = txt.match(/\[[\s\S]*\]/);
+          if (!m) throw new Error('No JSON in response');
+          setParsed(JSON.parse(m[0]));
+        } catch (e) { setErr(e.message); }
+        setLoading(false);
+      };
+
+      const doImport = () => {
+        if (!parsed) return;
+        onImport(parsed.map(s => ({
+          id: `r_${Date.now()}_${Math.random().toString(36).slice(2)}`,
+          date: s.date, type: 'planned', category: s.category || 'morning',
+          segments: s.segments || [], note: s.note || '', source: 'document',
+          durationMinutes: s.segments?.length ? calcDuration(s.segments) : null,
+        })));
+        setParsed(null); setFile(null);
+      };
+
+      return (
+        <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-5 space-y-4">
+          {/* Header */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-5 h-5 rounded bg-blue-500/20 flex items-center justify-center">
+                <span className="text-[10px] font-bold text-blue-400">G</span>
+              </div>
+              <h3 className="text-sm font-bold text-zinc-200">Chef's Intel</h3>
+              <span className="text-[10px] font-mono bg-blue-500/10 border border-blue-500/20 text-blue-400 px-1.5 py-0.5 rounded">AI Parser</span>
+            </div>
+            <button onClick={() => setShowKey(k => !k)} className="text-[10px] font-mono text-zinc-600 hover:text-zinc-400 transition-colors">
+              {showKey ? 'hide key' : 'set api key'}
+            </button>
+          </div>
+
+          {/* API Key */}
+          <AnimatePresence>
+            {showKey && (
+              <motion.div initial={{ height:0, opacity:0 }} animate={{ height:'auto', opacity:1 }} exit={{ height:0, opacity:0 }} style={{ overflow:'hidden' }}>
+                <input type="password" value={apiKey} onChange={e => setApiKey(e.target.value)}
+                  placeholder="Gemini API key — stored in localStorage only"
+                  className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2.5 text-sm font-mono text-zinc-200 placeholder:text-zinc-700 focus:outline-none focus:border-blue-500/60" />
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Drop Zone */}
+          <div
+            onDrop={e => { e.preventDefault(); handleFile(e); }}
+            onDragOver={e => e.preventDefault()}
+            onClick={() => fileRef.current?.click()}
+            className={cn('border-2 border-dashed rounded-xl p-6 text-center transition-all cursor-pointer',
+              file ? 'border-orange-500/40 bg-orange-500/5' : 'border-zinc-700 hover:border-zinc-600')}>
+            <input ref={fileRef} type="file" accept="image/*,.txt,.pdf" className="hidden" onChange={handleFile} />
+            {file ? (
+              <>
+                <FileText className="w-8 h-8 mx-auto mb-2 text-orange-400" />
+                <p className="text-sm text-zinc-300 font-medium truncate px-4">{file.name}</p>
+                <p className="text-xs text-zinc-600 mt-0.5">{(file.size/1024).toFixed(0)} KB</p>
+              </>
+            ) : (
+              <>
+                <Upload className="w-8 h-8 mx-auto mb-2 text-zinc-700" />
+                <p className="text-sm text-zinc-600">Drop schedule image or text file</p>
+                <p className="text-xs text-zinc-700 mt-0.5">PNG · JPG · TXT supported</p>
+              </>
+            )}
+          </div>
+
+          {/* Parse btn */}
+          <button onClick={parse} disabled={loading || !file}
+            className={cn('w-full py-3 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all',
+              loading || !file ? 'bg-zinc-800 text-zinc-600 cursor-not-allowed' : 'bg-blue-600 hover:bg-blue-500 text-white active:scale-[.98]')}>
+            {loading ? <><span className="spin inline-block w-4 h-4 border-2 border-white/30 border-t-white rounded-full" />Parsing…</> : 'Parse with Gemini'}
+          </button>
+
+          {err && <p className="text-xs text-red-400 font-mono">{err}</p>}
+
+          {/* Parsed preview */}
+          {parsed && (
+            <div className="space-y-2">
+              <p className="text-[10px] font-mono uppercase tracking-widest text-zinc-600">{parsed.length} shifts detected</p>
+              <div className="max-h-44 overflow-y-auto space-y-1.5 no-scroll">
+                {parsed.map((s, i) => (
+                  <div key={i} className="flex items-center gap-2 flex-wrap bg-zinc-800 rounded-lg px-3 py-2">
+                    <CatBadge cat={s.category} />
+                    <span className="text-xs font-mono text-zinc-400">{s.date}</span>
+                    {s.segments?.map((seg, j) => <SegPill key={j} seg={seg} />)}
+                    {s.note && <span className="text-xs text-zinc-600 truncate">{s.note}</span>}
+                  </div>
+                ))}
+              </div>
+              <button onClick={doImport}
+                className="w-full py-3 rounded-xl font-bold text-sm bg-emerald-600 hover:bg-emerald-500 text-white transition-all active:scale-[.98] flex items-center justify-center gap-2">
+                <CheckCircle2 className="w-4 h-4" />Import as Planned Shifts
+              </button>
+            </div>
+          )}
+
+          <p className="text-[10px] text-zinc-700 text-center font-mono">
+            🔒 API key &amp; all data stay in localStorage — nothing leaves the browser.
+          </p>
+        </div>
+      );
+    }
+
+    // ── ENTRY TAB ──────────────────────────────────────────────────────────────
+    function EntryTab({ onSave, onImport }) {
+      return (
+        <div className="space-y-4">
+          <ManualForm onSave={onSave} />
+          <AIParser onImport={onImport} />
+        </div>
+      );
+    }
+
+    // ── PLAN TAB ───────────────────────────────────────────────────────────────
+    function PlanTab({ records, onBulkFill }) {
+      const [month, setMonth]       = useState(new Date());
+      const [selected, setSelected] = useState(null);
+
+      const days = useMemo(() => eachDayOfInterval({ start: startOfMonth(month), end: endOfMonth(month) }), [month]);
+      const firstOff = (getDay(days[0]) + 6) % 7;
+      const DOW = ['M','T','W','T','F','S','S'];
+
+      const dayMap = useMemo(() => {
+        const m = {};
+        records.forEach(r => { if (!m[r.date]) m[r.date] = []; m[r.date].push(r); });
+        return m;
+      }, [records]);
+
+      const plannedCnt = days.filter(d => dayMap[format(d,'yyyy-MM-dd')]?.some(r => r.type === 'planned')).length;
+
+      return (
+        <div className="space-y-4">
+          {/* Nav */}
+          <div className="flex items-center justify-between bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-3.5">
+            <button onClick={() => setMonth(m => subMonths(m, 1))} className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"><ChevronLeft className="w-5 h-5" /></button>
+            <div className="text-center">
+              <p className="font-bold text-zinc-100">{format(month, 'MMMM yyyy')}</p>
+              <p className="text-xs text-zinc-600 font-mono mt-0.5">{plannedCnt} planned</p>
+            </div>
+            <button onClick={() => setMonth(m => addMonths(m, 1))} className="p-1.5 rounded-lg text-zinc-600 hover:text-zinc-300 hover:bg-zinc-800 transition-colors"><ChevronRight className="w-5 h-5" /></button>
+          </div>
+
+          {/* Bulk fill */}
+          <button onClick={() => onBulkFill(month)}
+            className="w-full py-3 rounded-xl border border-orange-500/20 text-orange-400/80 text-sm font-medium flex items-center justify-center gap-2 hover:border-orange-500/40 hover:bg-orange-500/5 transition-all active:scale-[.98]">
+            <Zap className="w-4 h-4" />Bulk Fill Weekdays (8h Planned)
+          </button>
+
+          {/* Calendar */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+            <div className="grid grid-cols-7 mb-2">
+              {DOW.map((d, i) => <div key={i} className={cn('text-center text-[10px] font-mono font-medium py-1 uppercase', i >= 5 ? 'text-zinc-800' : 'text-zinc-600')}>{d}</div>)}
+            </div>
+            <div className="grid grid-cols-7 gap-0.5">
+              {Array.from({ length: firstOff }).map((_, i) => <div key={`e${i}`} />)}
+              {days.map(day => {
+                const ds      = format(day, 'yyyy-MM-dd');
+                const recs    = dayMap[ds] || [];
+                const hasPlan = recs.some(r => r.type === 'planned');
+                const hasAct  = recs.some(r => r.type === 'actual');
+                const hasAbs  = recs.some(r => r.type === 'absence');
+                const hasNote = recs.some(r => r.note);
+                const isSplit = recs.some(r => r.category === 'split');
+                const today   = isToday(day);
+                const wknd    = isWeekend(day);
+                const isSel   = selected === ds;
+                return (
+                  <button key={ds} onClick={() => setSelected(isSel ? null : ds)}
+                    className={cn('aspect-square rounded-lg text-sm font-mono transition-all active:scale-90 relative flex flex-col items-center justify-center',
+                      hasAbs  ? 'bg-red-500/20 text-red-400 border border-red-500/30' :
+                      hasAct && hasPlan ? 'bg-emerald-500/15 text-emerald-400 border border-emerald-500/30' :
+                      hasAct  ? 'bg-zinc-800 text-zinc-200 border border-zinc-700' :
+                      hasPlan ? 'bg-orange-500/15 text-orange-400 border border-orange-500/30' :
+                      wknd    ? 'text-zinc-800' : 'text-zinc-500 hover:bg-zinc-800',
+                      today && 'ring-1 ring-orange-400/70',
+                      isSel && 'ring-2 ring-white/20')}>
+                    <span className="leading-none">{format(day, 'd')}</span>
+                    <div className="flex gap-0.5 mt-0.5 h-1">
+                      {hasNote  && <span className="w-1 h-1 rounded-full bg-blue-400" />}
+                      {isSplit  && <span className="w-1 h-1 rounded-full bg-purple-400" />}
+                    </div>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+
+          {/* Day Detail */}
+          <AnimatePresence>
+            {selected && (
+              <motion.div key={selected} initial={{ opacity:0, y:-8 }} animate={{ opacity:1, y:0 }} exit={{ opacity:0, y:-8 }}
+                className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4 space-y-3">
+                <p className="text-xs font-mono text-zinc-500">{format(parseISO(selected), 'EEEE, MMMM d, yyyy')}</p>
+                {(dayMap[selected] || []).length === 0 && <p className="text-sm text-zinc-700 font-mono">No records for this day.</p>}
+                {(dayMap[selected] || []).map(r => (
+                  <div key={r.id} className="space-y-1.5 pb-3 border-b border-zinc-800/60 last:border-0 last:pb-0">
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className={cn('text-[10px] font-mono uppercase px-1.5 py-0.5 rounded border',
+                        r.type === 'actual'  ? 'border-zinc-600 text-zinc-500' :
+                        r.type === 'planned' ? 'border-orange-500/30 text-orange-500/70' :
+                        'border-red-500/30 text-red-500/70')}>{r.type}</span>
+                      <CatBadge cat={r.category} />
+                      {r.source !== 'timer' && <span className="text-[10px] font-mono text-zinc-700 bg-zinc-800 px-1.5 py-0.5 rounded">{r.source}</span>}
+                      {r.durationMinutes != null && <span className="ml-auto font-mono font-bold text-sm text-orange-400">{toH(r.durationMinutes)}h</span>}
+                    </div>
+                    {r.segments?.length > 0 && (
+                      <div className="flex flex-wrap gap-1">
+                        {r.segments.map((seg, i) => (
+                          <React.Fragment key={i}>
+                            <SegPill seg={seg} />
+                            {i < r.segments.length - 1 && r.category === 'split' && (
+                              <span className="text-xs text-zinc-700 font-mono flex items-center px-1">⋯ pause ⋯</span>
+                            )}
+                          </React.Fragment>
+                        ))}
+                      </div>
+                    )}
+                    {r.note && <div className="flex items-center gap-1.5 text-xs text-zinc-600"><Info className="w-3 h-3 flex-shrink-0" />{r.note}</div>}
+                  </div>
+                ))}
+              </motion.div>
+            )}
+          </AnimatePresence>
+
+          {/* Legend */}
+          <div className="grid grid-cols-2 gap-x-4 gap-y-1.5 text-[10px] text-zinc-600 font-mono">
+            <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-orange-500/15 border border-orange-500/30 inline-block" />Planned</div>
+            <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-emerald-500/15 border border-emerald-500/30 inline-block" />Actual + Planned</div>
+            <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-zinc-800 border border-zinc-700 inline-block" />Actual only</div>
+            <div className="flex items-center gap-1.5"><span className="w-3 h-3 rounded-sm bg-red-500/20 border border-red-500/30 inline-block" />Absence</div>
+            <div className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-blue-400 inline-block" />Has note</div>
+            <div className="flex items-center gap-1.5"><span className="w-1 h-1 rounded-full bg-purple-400 inline-block" />Split shift</div>
+          </div>
+        </div>
+      );
+    }
+
+    // ── STATS TAB ──────────────────────────────────────────────────────────────
+    const ChartTip = ({ active, payload, label }) => {
+      if (!active || !payload?.length) return null;
+      return (
+        <div className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-xs shadow-xl">
+          <p className="text-zinc-400 mb-1.5 font-mono">{label}</p>
+          {payload.map(p => <p key={p.name} className="font-mono font-bold" style={{ color: p.color }}>{p.name}: {p.value}h</p>)}
+        </div>
+      );
+    };
+
+    function StatsTab({ records }) {
+      const now = new Date();
+
+      const totals = useMemo(() => {
+        const actual  = records.filter(r => r.type === 'actual'  && r.durationMinutes != null).reduce((s, r) => s + r.durationMinutes, 0);
+        const planned = records.filter(r => r.type === 'planned' && r.durationMinutes != null).reduce((s, r) => s + r.durationMinutes, 0);
+        const sick    = records.filter(r => r.category === 'sick').length;
+        const special = records.filter(r => r.category === 'special').length;
+        return { actual, planned, balance: actual - planned, sick, special };
+      }, [records]);
+
+      const weekData = useMemo(() => Array.from({ length: 8 }, (_, i) => {
+        const wS = startOfWeek(subWeeks(now, 7 - i), { weekStartsOn: 1 });
+        const wE = new Date(wS); wE.setDate(wE.getDate() + 6); wE.setHours(23,59,59,999);
+        const inW = r => { const d = parseISO(r.date); return d >= wS && d <= wE; };
+        const aMin = records.filter(r => r.type === 'actual'  && inW(r) && r.durationMinutes != null).reduce((s, r) => s + r.durationMinutes, 0);
+        const pMin = records.filter(r => r.type === 'planned' && inW(r) && r.durationMinutes != null).reduce((s, r) => s + r.durationMinutes, 0);
+        return { week: format(wS, 'MMM d'), actual: parseFloat((aMin/60).toFixed(1)), planned: parseFloat((pMin/60).toFixed(1)) };
+      }), [records]);
+
+      const daily = useMemo(() => {
+        const dates = [...new Set(records.map(r => r.date))].sort((a, b) => b.localeCompare(a)).slice(0, 7);
+        return dates.map(date => {
+          const recs   = records.filter(r => r.date === date);
+          const aMin   = recs.filter(r => r.type === 'actual'  && r.durationMinutes != null).reduce((s, r) => s + r.durationMinutes, 0);
+          const pMin   = recs.filter(r => r.type === 'planned' && r.durationMinutes != null).reduce((s, r) => s + r.durationMinutes, 0);
+          const first  = recs.find(r => r.type === 'actual' && r.segments?.length);
+          return { date, aMin, pMin, delta: aMin - pMin, checkIn: first?.segments?.[0]?.start, checkOut: first?.segments?.[first.segments.length-1]?.end };
+        });
+      }, [records]);
+
+      const bal = totals.balance / 60;
+      const isOver = bal > 0.05, isUnder = bal < -0.05;
+
+      return (
+        <div className="space-y-4">
+          {/* Balance */}
+          <div className={cn('rounded-2xl border p-5', isOver ? 'border-emerald-500/30 bg-emerald-500/5' : isUnder ? 'border-red-500/30 bg-red-500/5' : 'border-zinc-800 bg-zinc-900/80')}>
+            <div className="flex items-center gap-2 mb-1">
+              {isOver ? <TrendingUp className="w-4 h-4 text-emerald-400" /> : isUnder ? <TrendingDown className="w-4 h-4 text-red-400" /> : <Minus className="w-4 h-4 text-zinc-500" />}
+              <span className="text-[10px] font-mono tracking-[.18em] text-zinc-600 uppercase">All-Time Balance · The Delta</span>
+            </div>
+            <div className={cn('text-5xl font-mono font-bold mt-2', isOver ? 'text-emerald-400' : isUnder ? 'text-red-400' : 'text-zinc-600')}>
+              {bal >= 0 ? '+' : ''}{bal.toFixed(1)}h
+            </div>
+            <p className={cn('text-sm mt-1', isOver ? 'text-emerald-700' : isUnder ? 'text-red-700' : 'text-zinc-700')}>
+              {isOver ? 'Overtime — ahead of schedule' : isUnder ? 'Undertime — behind schedule' : 'Right on track'}
+            </p>
+            <div className="flex gap-8 mt-4 pt-4 border-t border-zinc-800/80">
+              <div><p className="text-[10px] text-zinc-600 uppercase font-mono tracking-wider">Worked</p><p className="font-mono font-bold text-orange-400 text-lg">{toH(totals.actual)}h</p></div>
+              <div><p className="text-[10px] text-zinc-600 uppercase font-mono tracking-wider">Planned</p><p className="font-mono font-bold text-zinc-400 text-lg">{toH(totals.planned)}h</p></div>
+            </div>
+          </div>
+
+          {/* Absence Tracker */}
+          {(totals.sick > 0 || totals.special > 0) && (
+            <div>
+              <p className="text-[10px] font-mono tracking-[.18em] text-zinc-600 uppercase mb-2">Absence Tracker</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-red-500/5 border border-red-500/20 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2"><Activity className="w-4 h-4 text-red-400" /><span className="text-[10px] font-mono uppercase tracking-wider text-zinc-600">Sick Days</span></div>
+                  <p className="font-mono font-bold text-3xl text-red-400">{totals.sick}</p>
+                </div>
+                <div className="bg-blue-500/5 border border-blue-500/20 rounded-xl p-4">
+                  <div className="flex items-center gap-2 mb-2"><Star className="w-4 h-4 text-blue-400" /><span className="text-[10px] font-mono uppercase tracking-wider text-zinc-600">Special</span></div>
+                  <p className="font-mono font-bold text-3xl text-blue-400">{totals.special}</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Chart */}
+          <div className="bg-zinc-900 border border-zinc-800 rounded-2xl p-4">
+            <p className="text-[10px] font-mono tracking-[.18em] text-zinc-600 uppercase mb-4">8-Week · Actual vs Planned</p>
+            {records.length > 0 ? (
+              <ResponsiveContainer width="100%" height={220}>
+                <BarChart data={weekData} margin={{ top:0, right:0, left:-28, bottom:0 }} barGap={3}>
+                  <CartesianGrid strokeDasharray="2 4" stroke="#27272a" vertical={false} />
+                  <XAxis dataKey="week" tick={{ fill:'#52525b', fontSize:10, fontFamily:'monospace' }} axisLine={false} tickLine={false} />
+                  <YAxis tick={{ fill:'#52525b', fontSize:10, fontFamily:'monospace' }} axisLine={false} tickLine={false} />
+                  <Tooltip content={<ChartTip />} cursor={{ fill:'rgba(255,255,255,0.025)' }} />
+                  <Bar dataKey="planned" name="Planned" fill="#3f3f46" radius={[3,3,0,0]} maxBarSize={18} />
+                  <Bar dataKey="actual"  name="Actual"  fill="#f97316" radius={[3,3,0,0]} maxBarSize={18} />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <div className="h-56 flex items-center justify-center text-zinc-700 text-sm font-mono">No data yet</div>
+            )}
+          </div>
+
+          {/* Daily Detail */}
+          {daily.length > 0 && (
+            <div>
+              <p className="text-[10px] font-mono tracking-[.18em] text-zinc-600 uppercase mb-3">Daily Detail</p>
+              <div className="space-y-2">
+                {daily.map(d => {
+                  const delta = d.delta / 60;
+                  return (
+                    <div key={d.date} className="bg-zinc-900 border border-zinc-800/80 rounded-xl px-4 py-3">
+                      <div className="flex items-center justify-between mb-1">
+                        <p className="text-sm text-zinc-300">{format(parseISO(d.date), 'EEE, MMM d')}</p>
+                        <span className={cn('text-sm font-mono font-bold', delta > 0.05 ? 'text-emerald-400' : delta < -0.05 ? 'text-red-400' : 'text-zinc-500')}>
+                          {delta >= 0 ? '+' : ''}{delta.toFixed(1)}h
+                        </span>
+                      </div>
+                      <div className="flex gap-4 text-xs font-mono text-zinc-600 flex-wrap">
+                        {d.checkIn  && <span>IN {d.checkIn}</span>}
+                        {d.checkOut && <span>OUT {d.checkOut}</span>}
+                        {d.aMin > 0 && <span className="text-orange-400">{fmtMins(d.aMin)}</span>}
+                        {d.pMin > 0 && <span>/ {fmtMins(d.pMin)} planned</span>}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+        </div>
+      );
+    }
+
+    // ── APP ────────────────────────────────────────────────────────────────────
+    const TABS = [
+      { id:'timer', label:'Timer', Icon: Clock        },
+      { id:'entry', label:'Log',   Icon: PenLine       },
+      { id:'plan',  label:'Plan',  Icon: CalendarDays  },
+      { id:'stats', label:'Stats', Icon: BarChart3     },
+    ];
+
+    function App() {
+      const [tab,     setTab]     = useState('timer');
+      const [records, setRecs]    = useLS(KEYS.RECORDS, []);
+      const [active,  setActive]  = useLS(KEYS.ACTIVE,  null);
+
+      const handleIn = useCallback(() => {
+        const now = new Date();
+        setActive({ id: `a_${Date.now()}`, date: format(now, 'yyyy-MM-dd'), checkIn: now.toISOString() });
+      }, [setActive]);
+
+      const handleOut = useCallback(() => {
+        if (!active) return;
+        const now = new Date();
+        const ci  = new Date(active.checkIn);
+        const cat = ci.getHours() < 12 ? 'morning' : 'afternoon';
+        const mins = Math.round((now.getTime() - ci.getTime()) / 60000);
+        setRecs(prev => [...prev, {
+          id: `r_${Date.now()}`, date: active.date, type: 'actual', category: cat,
+          segments: [{ start: format(ci, 'HH:mm'), end: format(now, 'HH:mm') }],
+          note: '', source: 'timer', durationMinutes: mins,
+        }]);
+        setActive(null);
+      }, [active, setRecs, setActive]);
+
+      const handleSave = useCallback(rec => setRecs(p => [...p, rec]), [setRecs]);
+
+      const handleImport = useCallback(recs => setRecs(p => [...p, ...recs]), [setRecs]);
+
+      const handleBulkFill = useCallback(monthDate => {
+        const all  = eachDayOfInterval({ start: startOfMonth(monthDate), end: endOfMonth(monthDate) });
+        const wkds = all.filter(d => !isWeekend(d));
+        const ex   = new Set(records.filter(r => r.type === 'planned').map(r => r.date));
+        setRecs(prev => [...prev, ...wkds
+          .filter(d => !ex.has(format(d, 'yyyy-MM-dd')))
+          .map(d => ({
+            id: `r_${Date.now()}_${Math.random().toString(36).slice(2,6)}`,
+            date: format(d, 'yyyy-MM-dd'), type: 'planned', category: 'morning',
+            segments: [{ start: '08:00', end: '16:00' }], note: '', source: 'manual', durationMinutes: 480,
+          }))
+        ]);
+      }, [records, setRecs]);
+
+      return (
+        <div className="flex flex-col max-w-lg mx-auto bg-[#0a0a0a]" style={{ height: '100dvh' }}>
+          {/* Header */}
+          <header className="flex-none px-5 pt-safe pb-4 border-b border-zinc-900/80">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 bg-orange-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <Flame className="w-4 h-4 text-white" />
+              </div>
+              <div>
+                <h1 className="text-base font-bold text-zinc-100 leading-tight tracking-tight">TrueHours</h1>
+                <p className="text-[10px] font-mono text-zinc-700 tracking-widest uppercase">Pro · Kitchen Noir</p>
+              </div>
+              {active && (
+                <div className="ml-auto flex items-center gap-1.5 bg-orange-500/10 border border-orange-500/20 rounded-full px-3 py-1">
+                  <span className="w-1.5 h-1.5 rounded-full bg-orange-500 animate-pulse" />
+                  <span className="text-[10px] font-mono text-orange-400 uppercase tracking-wider">Live</span>
+                </div>
+              )}
+            </div>
+          </header>
+
+          {/* Main */}
+          <main className="flex-1 overflow-y-auto no-scroll px-4 py-5">
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.div key={tab} initial={{ opacity:0, x:14 }} animate={{ opacity:1, x:0 }} exit={{ opacity:0, x:-14 }}
+                transition={{ duration:0.15, ease:[0.4,0,0.2,1] }}>
+                {tab === 'timer' && <TimerTab records={records} active={active} onIn={handleIn} onOut={handleOut} />}
+                {tab === 'entry' && <EntryTab onSave={handleSave} onImport={handleImport} />}
+                {tab === 'plan'  && <PlanTab  records={records} onBulkFill={handleBulkFill} />}
+                {tab === 'stats' && <StatsTab records={records} />}
+              </motion.div>
+            </AnimatePresence>
+          </main>
+
+          {/* Tab Bar */}
+          <nav className="flex-none border-t border-zinc-900/80 bg-[#0a0a0a] px-1 pt-2 pb-safe">
+            <div className="flex">
+              {TABS.map(({ id, label, Icon }) => {
+                const isA = tab === id;
+                return (
+                  <button key={id} onClick={() => setTab(id)}
+                    className={cn('flex-1 flex flex-col items-center gap-1 py-2 rounded-xl transition-colors relative', isA ? 'text-orange-400' : 'text-zinc-700 hover:text-zinc-500')}>
+                    <Icon className="w-5 h-5" strokeWidth={isA ? 2.5 : 2} />
+                    <span className="text-[10px] font-medium font-mono">{label}</span>
+                    {isA && (
+                      <motion.div layoutId="tab-pip" className="absolute bottom-1.5 w-1 h-1 rounded-full bg-orange-500"
+                        transition={{ type:'spring', stiffness:420, damping:32 }} />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+          </nav>
+        </div>
+      );
+    }
+
+    createRoot(document.getElementById('root')).render(<App />);
+  </script>
+</body>
+</html>
