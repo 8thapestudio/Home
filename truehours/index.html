@@ -370,6 +370,393 @@
     // ── CONSTANTS ──────────────────────────────────────────────────────────────
     const KEYS = { RECORDS: 'cs_records', ACTIVE: 'cs_active', GEMINI: 'cs_gemini' };
 
+    // ── TRANSLATIONS ───────────────────────────────────────────────────────────
+    const TRANS = {
+      en: {
+        app_subtitle: 'Pro · 8th Ape Studio',
+        live: 'Live',
+        tab_timer: 'Timer', tab_log: 'Log', tab_plan: 'Plan', tab_stats: 'Stats',
+        shift_active: 'Shift Active', off_duty: 'Off Duty',
+        no_shifts_yet: 'No shifts logged yet',
+        recent_shifts: 'Recent Shifts',
+        check_in: 'Check In', check_out: 'Check Out',
+        confirm_checkin: 'Check In?', confirm_checkout: 'Check Out?',
+        confirm_checkin_sub: 'Start shift at {time}',
+        confirm_checkout_sub: 'End after {elapsed}',
+        start_shift: 'Start Shift', end_shift: 'End Shift',
+        manual_entry: 'Manual Entry',
+        date_label: 'Date', type_label: 'Type', category_label: 'Category',
+        time_segments: 'Time Segments',
+        overtime_hours: 'Overtime Hours',
+        ot_from_shift: '(overtime from this shift)',
+        ot_deduct: '(deduct from bank)',
+        note_label: 'Note', note_optional: '(optional)',
+        save_record: 'Save Record', saved: '✓ Saved',
+        add_segment: 'Add segment',
+        type_actual: 'actual', type_planned: 'planned', type_absence: 'absence',
+        cat_morning: 'Morning', cat_afternoon: 'Afternoon', cat_split: 'Split',
+        cat_sick: 'Sick', cat_vacation: 'Vacation', cat_holiday: 'Holiday',
+        cat_ot_used: 'OT Used', cat_special: 'Special',
+        chefs_intel: "Chef's Intel",
+        api_key_label: 'Gemini API Key',
+        drop_file: 'Drop schedule image or text',
+        parse_btn: 'Parse with Gemini',
+        import_btn: 'Import {n} shifts',
+        api_privacy: 'API key stays in localStorage — nothing leaves the browser',
+        planned_count: '{n} planned',
+        bulk_fill: 'Bulk Fill Weekdays (8h)',
+        no_records_day: 'No records for this day.',
+        all_time_balance: 'All-Time Balance · The Delta',
+        overtime_text: 'Overtime — ahead of schedule',
+        undertime_text: 'Undertime — behind schedule',
+        on_track_text: 'Right on track',
+        worked_label: 'Worked', planned_label: 'Planned',
+        overtime_bank: 'Overtime Bank',
+        earned_label: 'Earned', used_label: 'Used',
+        week_chart: '8-Week · Actual vs Planned',
+        no_data: 'No data yet',
+        daily_detail: 'Daily Detail',
+        planned_stat: 'planned',
+        cat_sick_stat: 'Sick', cat_vacation_stat: 'Vacation',
+        cat_holiday_stat: 'Holiday', cat_special_stat: 'Special',
+        settings_title: 'Settings',
+        lang_label: 'Language / Jazyk / Sprache',
+        danger_zone: 'Danger Zone',
+        delete_data_btn: 'Delete all data',
+        confirm1_title: 'Delete all data?',
+        confirm1_sub: 'All shifts, plans and records will be permanently removed.',
+        confirm1_ok: 'Yes, delete', confirm1_cancel: 'Cancel',
+        confirm2_title: 'Last chance',
+        confirm2_sub: 'This action is irreversible. The app will return to factory settings.',
+        confirm2_ok: 'Delete Everything', confirm2_cancel: 'Cancel',
+        legend_planned: 'Planned', legend_actual_planned: 'Actual + Planned',
+        legend_actual: 'Actual only', legend_absence: 'Absence',
+        shifts_detected: '{n} shifts detected',
+        import_as_planned: 'Import as Planned',
+        hide: 'hide', set_key: 'set key', parsing: 'Parsing…',
+      },
+      de: {
+        app_subtitle: 'Pro · 8th Ape Studio',
+        live: 'Live',
+        tab_timer: 'Timer', tab_log: 'Log', tab_plan: 'Plan', tab_stats: 'Statistik',
+        shift_active: 'Schicht aktiv', off_duty: 'Dienstfrei',
+        no_shifts_yet: 'Noch keine Schichten erfasst',
+        recent_shifts: 'Letzte Schichten',
+        check_in: 'Einstempeln', check_out: 'Ausstempeln',
+        confirm_checkin: 'Einstempeln?', confirm_checkout: 'Ausstempeln?',
+        confirm_checkin_sub: 'Schicht beginnt um {time}',
+        confirm_checkout_sub: 'Ende nach {elapsed}',
+        start_shift: 'Schicht starten', end_shift: 'Schicht beenden',
+        manual_entry: 'Manuelle Eingabe',
+        date_label: 'Datum', type_label: 'Typ', category_label: 'Kategorie',
+        time_segments: 'Zeitabschnitte',
+        overtime_hours: 'Überstunden',
+        ot_from_shift: '(Überstunden dieser Schicht)',
+        ot_deduct: '(vom Konto abziehen)',
+        note_label: 'Notiz', note_optional: '(optional)',
+        save_record: 'Eintrag speichern', saved: '✓ Gespeichert',
+        add_segment: 'Abschnitt hinzufügen',
+        type_actual: 'tatsächlich', type_planned: 'geplant', type_absence: 'Abwesenheit',
+        cat_morning: 'Früh', cat_afternoon: 'Spät', cat_split: 'Geteilt',
+        cat_sick: 'Krank', cat_vacation: 'Urlaub', cat_holiday: 'Feiertag',
+        cat_ot_used: 'ÜZ genutzt', cat_special: 'Sonstig',
+        chefs_intel: "Chef's Intel",
+        api_key_label: 'Gemini API-Schlüssel',
+        drop_file: 'Dienstplan-Bild oder Text ablegen',
+        parse_btn: 'Mit Gemini analysieren',
+        import_btn: '{n} Schichten importieren',
+        api_privacy: 'API-Schlüssel bleibt im localStorage — nichts verlässt den Browser',
+        planned_count: '{n} geplant',
+        bulk_fill: 'Wochentage füllen (8h)',
+        no_records_day: 'Keine Einträge für diesen Tag.',
+        all_time_balance: 'Gesamtbilanz · Das Delta',
+        overtime_text: 'Überstunden — vor dem Zeitplan',
+        undertime_text: 'Minusstunden — hinter dem Zeitplan',
+        on_track_text: 'Genau im Plan',
+        worked_label: 'Gearbeitet', planned_label: 'Geplant',
+        overtime_bank: 'Überstundenkonto',
+        earned_label: 'Erworben', used_label: 'Verwendet',
+        week_chart: '8 Wochen · Ist vs. Soll',
+        no_data: 'Noch keine Daten',
+        daily_detail: 'Tagesdetail',
+        planned_stat: 'geplant',
+        cat_sick_stat: 'Krank', cat_vacation_stat: 'Urlaub',
+        cat_holiday_stat: 'Feiertag', cat_special_stat: 'Sonstig',
+        settings_title: 'Einstellungen',
+        lang_label: 'Language / Jazyk / Sprache',
+        danger_zone: 'Gefahrenbereich',
+        delete_data_btn: 'Alle Daten löschen',
+        confirm1_title: 'Alle Daten löschen?',
+        confirm1_sub: 'Alle Schichten, Pläne und Einträge werden dauerhaft gelöscht.',
+        confirm1_ok: 'Ja, löschen', confirm1_cancel: 'Abbrechen',
+        confirm2_title: 'Letzte Chance',
+        confirm2_sub: 'Diese Aktion ist unwiderruflich. Die App wird auf Werkseinstellungen zurückgesetzt.',
+        confirm2_ok: 'Alles löschen', confirm2_cancel: 'Abbrechen',
+        legend_planned: 'Geplant', legend_actual_planned: 'Ist + Soll',
+        legend_actual: 'Nur Ist', legend_absence: 'Abwesenheit',
+        shifts_detected: '{n} Schichten erkannt',
+        import_as_planned: 'Als geplant importieren',
+        hide: 'ausblenden', set_key: 'Schlüssel setzen', parsing: 'Analysiere…',
+      },
+      it: {
+        app_subtitle: 'Pro · 8th Ape Studio',
+        live: 'Live',
+        tab_timer: 'Timer', tab_log: 'Log', tab_plan: 'Piano', tab_stats: 'Statistiche',
+        shift_active: 'Turno attivo', off_duty: 'Fuori servizio',
+        no_shifts_yet: 'Nessun turno registrato',
+        recent_shifts: 'Turni recenti',
+        check_in: 'Entrata', check_out: 'Uscita',
+        confirm_checkin: 'Registrare entrata?', confirm_checkout: 'Registrare uscita?',
+        confirm_checkin_sub: 'Turno inizia alle {time}',
+        confirm_checkout_sub: 'Fine dopo {elapsed}',
+        start_shift: 'Inizia turno', end_shift: 'Termina turno',
+        manual_entry: 'Inserimento manuale',
+        date_label: 'Data', type_label: 'Tipo', category_label: 'Categoria',
+        time_segments: 'Segmenti orari',
+        overtime_hours: 'Ore straordinario',
+        ot_from_shift: '(straordinario di questo turno)',
+        ot_deduct: '(detrarre dal saldo)',
+        note_label: 'Nota', note_optional: '(opzionale)',
+        save_record: 'Salva registro', saved: '✓ Salvato',
+        add_segment: 'Aggiungi segmento',
+        type_actual: 'effettivo', type_planned: 'pianificato', type_absence: 'assenza',
+        cat_morning: 'Mattina', cat_afternoon: 'Pomeriggio', cat_split: 'Diviso',
+        cat_sick: 'Malattia', cat_vacation: 'Ferie', cat_holiday: 'Festivo',
+        cat_ot_used: 'Straord. usato', cat_special: 'Speciale',
+        chefs_intel: "Chef's Intel",
+        api_key_label: 'Chiave API Gemini',
+        drop_file: 'Trascina immagine o file di testo',
+        parse_btn: 'Analizza con Gemini',
+        import_btn: 'Importa {n} turni',
+        api_privacy: 'La chiave API rimane nel localStorage — nulla lascia il browser',
+        planned_count: '{n} pianificati',
+        bulk_fill: 'Riempi giorni feriali (8h)',
+        no_records_day: 'Nessun record per questo giorno.',
+        all_time_balance: 'Saldo totale · Il Delta',
+        overtime_text: 'Straordinario — avanti sui piani',
+        undertime_text: 'Deficit ore — in ritardo sui piani',
+        on_track_text: 'Perfettamente in linea',
+        worked_label: 'Lavorato', planned_label: 'Pianificato',
+        overtime_bank: 'Banca straordinari',
+        earned_label: 'Maturato', used_label: 'Utilizzato',
+        week_chart: '8 settimane · Effettivo vs Pianificato',
+        no_data: 'Nessun dato ancora',
+        daily_detail: 'Dettaglio giornaliero',
+        planned_stat: 'pianificato',
+        cat_sick_stat: 'Malattia', cat_vacation_stat: 'Ferie',
+        cat_holiday_stat: 'Festivo', cat_special_stat: 'Speciale',
+        settings_title: 'Impostazioni',
+        lang_label: 'Language / Jazyk / Sprache',
+        danger_zone: 'Zona pericolosa',
+        delete_data_btn: 'Elimina tutti i dati',
+        confirm1_title: 'Eliminare tutti i dati?',
+        confirm1_sub: 'Tutti i turni, i piani e i registri saranno eliminati definitivamente.',
+        confirm1_ok: 'Sì, elimina', confirm1_cancel: 'Annulla',
+        confirm2_title: 'Ultima possibilità',
+        confirm2_sub: "Questa azione è irreversibile. L'app tornerà alle impostazioni di fabbrica.",
+        confirm2_ok: 'Elimina tutto', confirm2_cancel: 'Annulla',
+        legend_planned: 'Pianificato', legend_actual_planned: 'Effettivo + Pianificato',
+        legend_actual: 'Solo effettivo', legend_absence: 'Assenza',
+        shifts_detected: '{n} turni rilevati',
+        import_as_planned: 'Importa come pianificato',
+        hide: 'nascondi', set_key: 'imposta chiave', parsing: 'Analisi…',
+      },
+      cs: {
+        app_subtitle: 'Pro · 8th Ape Studio',
+        live: 'Živě',
+        tab_timer: 'Časovač', tab_log: 'Záznamy', tab_plan: 'Plán', tab_stats: 'Statistiky',
+        shift_active: 'Směna probíhá', off_duty: 'Mimo službu',
+        no_shifts_yet: 'Zatím žádné směny',
+        recent_shifts: 'Poslední směny',
+        check_in: 'Příchod', check_out: 'Odchod',
+        confirm_checkin: 'Zaznamenat příchod?', confirm_checkout: 'Zaznamenat odchod?',
+        confirm_checkin_sub: 'Začátek směny v {time}',
+        confirm_checkout_sub: 'Konec po {elapsed}',
+        start_shift: 'Začít směnu', end_shift: 'Ukončit směnu',
+        manual_entry: 'Ruční zadání',
+        date_label: 'Datum', type_label: 'Typ', category_label: 'Kategorie',
+        time_segments: 'Časové úseky',
+        overtime_hours: 'Přesčasové hodiny',
+        ot_from_shift: '(přesčasy z této směny)',
+        ot_deduct: '(odečíst z banku)',
+        note_label: 'Poznámka', note_optional: '(volitelné)',
+        save_record: 'Uložit záznam', saved: '✓ Uloženo',
+        add_segment: 'Přidat úsek',
+        type_actual: 'skutečný', type_planned: 'plánovaný', type_absence: 'nepřítomnost',
+        cat_morning: 'Ranní', cat_afternoon: 'Odpolední', cat_split: 'Dělená',
+        cat_sick: 'Nemoc', cat_vacation: 'Dovolená', cat_holiday: 'Svátek',
+        cat_ot_used: 'ČP využito', cat_special: 'Speciální',
+        chefs_intel: "Chef's Intel",
+        api_key_label: 'Klíč Gemini API',
+        drop_file: 'Přetáhněte obrázek nebo textový soubor',
+        parse_btn: 'Analyzovat s Gemini',
+        import_btn: 'Importovat {n} směn',
+        api_privacy: 'Klíč API zůstává v localStorage — nic neopouští prohlížeč',
+        planned_count: '{n} naplánováno',
+        bulk_fill: 'Vyplnit pracovní dny (8h)',
+        no_records_day: 'Žádné záznamy pro tento den.',
+        all_time_balance: 'Celková bilance · Delta',
+        overtime_text: 'Přesčas — před plánem',
+        undertime_text: 'Deficit — za plánem',
+        on_track_text: 'Přesně podle plánu',
+        worked_label: 'Odpracováno', planned_label: 'Naplánováno',
+        overtime_bank: 'Banka přesčasů',
+        earned_label: 'Získáno', used_label: 'Použito',
+        week_chart: '8 týdnů · Skutečnost vs Plán',
+        no_data: 'Zatím žádná data',
+        daily_detail: 'Denní přehled',
+        planned_stat: 'naplánováno',
+        cat_sick_stat: 'Nemoc', cat_vacation_stat: 'Dovolená',
+        cat_holiday_stat: 'Svátek', cat_special_stat: 'Speciální',
+        settings_title: 'Nastavení',
+        lang_label: 'Language / Jazyk / Sprache',
+        danger_zone: 'Nebezpečná zóna',
+        delete_data_btn: 'Odstranit všechna data',
+        confirm1_title: 'Smazat všechna data?',
+        confirm1_sub: 'Všechny směny, plány a záznamy budou trvale odstraněny.',
+        confirm1_ok: 'Ano, smazat', confirm1_cancel: 'Zrušit',
+        confirm2_title: 'Poslední šance',
+        confirm2_sub: 'Tato akce je nevratná. Aplikace se vrátí do továrního nastavení.',
+        confirm2_ok: 'Smazat vše', confirm2_cancel: 'Zrušit',
+        legend_planned: 'Naplánováno', legend_actual_planned: 'Skutečnost + Plán',
+        legend_actual: 'Pouze skutečnost', legend_absence: 'Nepřítomnost',
+        shifts_detected: '{n} směn nalezeno',
+        import_as_planned: 'Importovat jako plánované',
+        hide: 'skrýt', set_key: 'nastavit klíč', parsing: 'Analyzuji…',
+      },
+      sk: {
+        app_subtitle: 'Pro · 8th Ape Studio',
+        live: 'Naživo',
+        tab_timer: 'Časovač', tab_log: 'Záznamy', tab_plan: 'Plán', tab_stats: 'Štatistiky',
+        shift_active: 'Smena prebieha', off_duty: 'Mimo službu',
+        no_shifts_yet: 'Zatiaľ žiadne smeny',
+        recent_shifts: 'Posledné smeny',
+        check_in: 'Príchod', check_out: 'Odchod',
+        confirm_checkin: 'Zaznamenať príchod?', confirm_checkout: 'Zaznamenať odchod?',
+        confirm_checkin_sub: 'Začiatok smeny o {time}',
+        confirm_checkout_sub: 'Koniec po {elapsed}',
+        start_shift: 'Začať smenu', end_shift: 'Ukončiť smenu',
+        manual_entry: 'Ručné zadanie',
+        date_label: 'Dátum', type_label: 'Typ', category_label: 'Kategória',
+        time_segments: 'Časové úseky',
+        overtime_hours: 'Nadčasové hodiny',
+        ot_from_shift: '(nadčasy z tejto smeny)',
+        ot_deduct: '(odpočítať z banky)',
+        note_label: 'Poznámka', note_optional: '(voliteľné)',
+        save_record: 'Uložiť záznam', saved: '✓ Uložené',
+        add_segment: 'Pridať úsek',
+        type_actual: 'skutočný', type_planned: 'plánovaný', type_absence: 'neprítomnosť',
+        cat_morning: 'Ranná', cat_afternoon: 'Poobedná', cat_split: 'Delená',
+        cat_sick: 'Choroba', cat_vacation: 'Dovolenka', cat_holiday: 'Sviatok',
+        cat_ot_used: 'NČ využité', cat_special: 'Špeciálna',
+        chefs_intel: "Chef's Intel",
+        api_key_label: 'Kľúč Gemini API',
+        drop_file: 'Presuňte obrázok alebo textový súbor',
+        parse_btn: 'Analyzovať s Gemini',
+        import_btn: 'Importovať {n} smien',
+        api_privacy: 'Kľúč API zostáva v localStorage — nič neopúšťa prehliadač',
+        planned_count: '{n} naplánované',
+        bulk_fill: 'Vyplniť pracovné dni (8h)',
+        no_records_day: 'Žiadne záznamy pre tento deň.',
+        all_time_balance: 'Celková bilancia · Delta',
+        overtime_text: 'Nadčas — pred plánom',
+        undertime_text: 'Deficit — za plánom',
+        on_track_text: 'Presne podľa plánu',
+        worked_label: 'Odpracované', planned_label: 'Naplánované',
+        overtime_bank: 'Banka nadčasov',
+        earned_label: 'Získané', used_label: 'Použité',
+        week_chart: '8 týždňov · Skutočnosť vs Plán',
+        no_data: 'Zatiaľ žiadne údaje',
+        daily_detail: 'Denný prehľad',
+        planned_stat: 'naplánované',
+        cat_sick_stat: 'Choroba', cat_vacation_stat: 'Dovolenka',
+        cat_holiday_stat: 'Sviatok', cat_special_stat: 'Špeciálna',
+        settings_title: 'Nastavenia',
+        lang_label: 'Language / Jazyk / Sprache',
+        danger_zone: 'Nebezpečná zóna',
+        delete_data_btn: 'Odstrániť všetky dáta',
+        confirm1_title: 'Vymazať všetky dáta?',
+        confirm1_sub: 'Všetky smeny, plány a záznamy budú trvalo odstránené.',
+        confirm1_ok: 'Áno, vymazať', confirm1_cancel: 'Zrušiť',
+        confirm2_title: 'Posledná šanca',
+        confirm2_sub: 'Táto akcia je nevratná. Aplikácia sa vráti do továrenského nastavenia.',
+        confirm2_ok: 'Vymazať všetko', confirm2_cancel: 'Zrušiť',
+        legend_planned: 'Naplánované', legend_actual_planned: 'Skutočnosť + Plán',
+        legend_actual: 'Iba skutočnosť', legend_absence: 'Neprítomnosť',
+        shifts_detected: '{n} smien nájdených',
+        import_as_planned: 'Importovať ako plánované',
+        hide: 'skryť', set_key: 'nastaviť kľúč', parsing: 'Analyzujem…',
+      },
+      hu: {
+        app_subtitle: 'Pro · 8th Ape Studio',
+        live: 'Élő',
+        tab_timer: 'Időmérő', tab_log: 'Napló', tab_plan: 'Terv', tab_stats: 'Statisztika',
+        shift_active: 'Műszak folyamatban', off_duty: 'Nem szolgálatban',
+        no_shifts_yet: 'Még nincs rögzített műszak',
+        recent_shifts: 'Legutóbbi műszakok',
+        check_in: 'Belépés', check_out: 'Kilépés',
+        confirm_checkin: 'Belépés rögzítése?', confirm_checkout: 'Kilépés rögzítése?',
+        confirm_checkin_sub: 'Műszak kezdete {time}-kor',
+        confirm_checkout_sub: 'Vége {elapsed} után',
+        start_shift: 'Műszak indítása', end_shift: 'Műszak befejezése',
+        manual_entry: 'Kézi bevitel',
+        date_label: 'Dátum', type_label: 'Típus', category_label: 'Kategória',
+        time_segments: 'Időszakaszok',
+        overtime_hours: 'Túlóra',
+        ot_from_shift: '(túlóra ebből a műszakból)',
+        ot_deduct: '(levonás az egyenlegből)',
+        note_label: 'Megjegyzés', note_optional: '(nem kötelező)',
+        save_record: 'Bejegyzés mentése', saved: '✓ Mentve',
+        add_segment: 'Szakasz hozzáadása',
+        type_actual: 'tényleges', type_planned: 'tervezett', type_absence: 'hiányzás',
+        cat_morning: 'Reggeli', cat_afternoon: 'Délutáni', cat_split: 'Osztott',
+        cat_sick: 'Betegség', cat_vacation: 'Szabadság', cat_holiday: 'Ünnepnap',
+        cat_ot_used: 'TO felhasznált', cat_special: 'Különleges',
+        chefs_intel: "Chef's Intel",
+        api_key_label: 'Gemini API-kulcs',
+        drop_file: 'Húzza ide a beosztás képét vagy szövegét',
+        parse_btn: 'Elemzés Gemini-vel',
+        import_btn: '{n} műszak importálása',
+        api_privacy: 'Az API-kulcs a localStorage-ban marad — semmi sem hagyja el a böngészőt',
+        planned_count: '{n} tervezett',
+        bulk_fill: 'Hétköznapok kitöltése (8h)',
+        no_records_day: 'Nincs bejegyzés erre a napra.',
+        all_time_balance: 'Összesített egyenleg · A Delta',
+        overtime_text: 'Túlóra — terv előtt',
+        undertime_text: 'Hiányóra — terv mögött',
+        on_track_text: 'Pontosan tervezett',
+        worked_label: 'Ledolgozott', planned_label: 'Tervezett',
+        overtime_bank: 'Túlóra-bank',
+        earned_label: 'Megszerzett', used_label: 'Felhasznált',
+        week_chart: '8 hét · Tényleges vs Tervezett',
+        no_data: 'Még nincs adat',
+        daily_detail: 'Napi részletek',
+        planned_stat: 'tervezett',
+        cat_sick_stat: 'Betegség', cat_vacation_stat: 'Szabadság',
+        cat_holiday_stat: 'Ünnepnap', cat_special_stat: 'Különleges',
+        settings_title: 'Beállítások',
+        lang_label: 'Language / Jazyk / Sprache',
+        danger_zone: 'Veszélyes zóna',
+        delete_data_btn: 'Összes adat törlése',
+        confirm1_title: 'Törli az összes adatot?',
+        confirm1_sub: 'Az összes műszak, terv és bejegyzés véglegesen törlődik.',
+        confirm1_ok: 'Igen, törlés', confirm1_cancel: 'Mégse',
+        confirm2_title: 'Utolsó esély',
+        confirm2_sub: 'Ez a művelet visszafordíthatatlan. Az alkalmazás gyári beállításokra áll vissza.',
+        confirm2_ok: 'Mindent töröl', confirm2_cancel: 'Mégse',
+        legend_planned: 'Tervezett', legend_actual_planned: 'Tényleges + Tervezett',
+        legend_actual: 'Csak tényleges', legend_absence: 'Hiányzás',
+        shifts_detected: '{n} műszak találva',
+        import_as_planned: 'Importálás tervezettként',
+        hide: 'elrejt', set_key: 'kulcs beállítása', parsing: 'Elemzés…',
+      },
+    };
+
+    // ── i18n HELPERS ───────────────────────────────────────────────────────────
+    let _t = {};
+    const t  = k => _t[k] !== undefined ? _t[k] : k;
+    const tt = (key, vars={}) => Object.entries(vars).reduce((s,[k,v])=>s.replace(`{${k}}`,v), t(key));
+
     const CATS = {
       morning:   { label:'Morning',   Icon: Sun,      pillClass:'active-amber',  color:'#fbbf24', border:'rgba(245,158,11,.3)'  },
       afternoon: { label:'Afternoon', Icon: Sunset,   pillClass:'active-cyan',   color:'#00f5ff', border:'rgba(0,245,255,.3)'   },
@@ -407,7 +794,7 @@
     }
 
     // ── SHARED ─────────────────────────────────────────────────────────────────
-    function ConfirmModal({ open, title, sub, okLabel, danger, onOk, onCancel }) {
+    function ConfirmModal({ open, title, sub, okLabel, cancelLabel, danger, onOk, onCancel }) {
       if (!open) return null;
       return (
         <div className="modal-overlay" onClick={onCancel}>
@@ -424,7 +811,7 @@
               </div>
             </div>
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'.75rem' }}>
-              <button onClick={onCancel} style={{ padding:'.85rem', borderRadius:'10px', border:'1px solid var(--border)', background:'none', color:'var(--muted)', fontWeight:600, fontSize:'.82rem', cursor:'pointer' }}>Cancel</button>
+              <button onClick={onCancel} style={{ padding:'.85rem', borderRadius:'10px', border:'1px solid var(--border)', background:'none', color:'var(--muted)', fontWeight:600, fontSize:'.82rem', cursor:'pointer' }}>{cancelLabel||t('confirm1_cancel')}</button>
               <button onClick={onOk} style={{ padding:'.85rem', borderRadius:'10px', border:'none', fontWeight:700, fontSize:'.82rem', cursor:'pointer', letterSpacing:'.04em', background: danger?'rgba(255,45,120,.15)':'rgba(0,245,255,.1)', color:danger?'#ff2d78':'var(--cyan)', borderColor:danger?'rgba(255,45,120,.3)':'rgba(0,245,255,.3)', outline: danger?'1px solid rgba(255,45,120,.3)':'1px solid rgba(0,245,255,.3)' }}>
                 {okLabel}
               </button>
@@ -439,7 +826,7 @@
       const Icon = c.Icon;
       return (
         <span className="cat-badge" style={{ color:c.color, borderColor:c.border, background:`${c.border.replace('.3',',.08')}` }}>
-          <Icon size={10} />{c.label}
+          <Icon size={10} />{t(`cat_${cat}`)}
         </span>
       );
     }
@@ -482,7 +869,7 @@
                 <div style={{ display:'flex', alignItems:'center', gap:'.5rem' }}>
                   <span className={`status-dot ${active?'live':''}`} />
                   <span style={{ fontSize:'.6rem', fontWeight:700, letterSpacing:'.15em', textTransform:'uppercase', color:'var(--muted)' }}>
-                    {active ? 'Shift Active' : 'Off Duty'}
+                    {active ? t('shift_active') : t('off_duty')}
                   </span>
                 </div>
                 {active && (
@@ -509,8 +896,8 @@
                 className={`btn-checkin ${active?'checkout':''}`}
                 onClick={()=>setModal(active?'out':'in')}>
                 {active
-                  ? <><LogOut size={15} />Check Out</>
-                  : <><LogIn  size={15} />Check In</>}
+                  ? <><LogOut size={15} />{t('check_out')}</>
+                  : <><LogIn  size={15} />{t('check_in')}</>}
               </button>
             </div>
           </div>
@@ -518,7 +905,7 @@
           {/* Recent */}
           {recent.length > 0 && (
             <div>
-              <div className="section-label">Recent Shifts</div>
+              <div className="section-label">{t('recent_shifts')}</div>
               <div style={{ display:'flex', flexDirection:'column', gap:'.5rem' }}>
                 {recent.map(r=>(
                   <div key={r.id} className="section-card" style={{ padding:'.85rem 1rem', display:'flex', flexDirection:'column', gap:'.4rem' }}>
@@ -547,15 +934,15 @@
           {!active && recent.length===0 && (
             <div style={{ textAlign:'center', padding:'2rem 0', color:'var(--muted)' }}>
               <Clock size={36} style={{ margin:'0 auto .75rem', opacity:.15, display:'block' }} />
-              <p style={{ fontSize:'.8rem', fontFamily:'JetBrains Mono,monospace' }}>No shifts logged yet</p>
+              <p style={{ fontSize:'.8rem', fontFamily:'JetBrains Mono,monospace' }}>{t('no_shifts_yet')}</p>
             </div>
           )}
 
           <AnimatePresence>
             {modal && (
-              <ConfirmModal open title={modal==='in'?'Check In?':'Check Out?'}
-                sub={modal==='in'?`Start shift at ${format(now,'HH:mm')}`:`End after ${fmtElapsed(elapsed)}`}
-                okLabel={modal==='in'?'Start Shift':'End Shift'} danger={modal==='out'}
+              <ConfirmModal open title={modal==='in'?t('confirm_checkin'):t('confirm_checkout')}
+                sub={modal==='in'?tt('confirm_checkin_sub',{time:format(now,'HH:mm')}):tt('confirm_checkout_sub',{elapsed:fmtElapsed(elapsed)})}
+                okLabel={modal==='in'?t('start_shift'):t('end_shift')} danger={modal==='out'}
                 onOk={()=>{ modal==='in'?onIn():onOut(); setModal(null); }}
                 onCancel={()=>setModal(null)} />
             )}
@@ -582,7 +969,7 @@
           ))}
           {segs.length<3 && (
             <button onClick={add} style={{ display:'flex', alignItems:'center', gap:'.3rem', background:'none', border:'none', color:'rgba(0,245,255,.5)', fontSize:'.72rem', fontFamily:'JetBrains Mono,monospace', cursor:'pointer', padding:'.2rem 0' }}>
-              <Plus size={11}/>Add segment
+              <Plus size={11}/>{t('add_segment')}
             </button>
           )}
         </div>
@@ -614,28 +1001,28 @@
         <div className="section-card" style={{ display:'flex', flexDirection:'column', gap:'.9rem' }}>
           <div style={{ display:'flex', alignItems:'center', gap:'.5rem' }}>
             <PenLine size={14} style={{ color:'var(--cyan)' }} />
-            <span style={{ fontWeight:700, fontSize:'.88rem' }}>Manual Entry</span>
+            <span style={{ fontWeight:700, fontSize:'.88rem' }}>{t('manual_entry')}</span>
           </div>
 
-          <div><label className="field-label">Date</label>
+          <div><label className="field-label">{t('date_label')}</label>
             <input type="date" value={f.date} onChange={e=>set('date',e.target.value)} className="field-input" style={{ fontFamily:'JetBrains Mono,monospace' }} />
           </div>
 
-          <div><label className="field-label">Type</label>
+          <div><label className="field-label">{t('type_label')}</label>
             <div className="pill-row">
-              {['actual','planned','absence'].map(t=>(
-                <button key={t} className={cn('pill', f.type===t?t==='absence'?'active-red':'active-cyan':'')} onClick={()=>{ set('type',t); set('category',t==='absence'?'sick':'morning'); }}>
-                  {t}
+              {['actual','planned','absence'].map(tp=>(
+                <button key={tp} className={cn('pill', f.type===tp?tp==='absence'?'active-red':'active-cyan':'')} onClick={()=>{ set('type',tp); set('category',tp==='absence'?'sick':'morning'); }}>
+                  {t(`type_${tp}`)}
                 </button>
               ))}
             </div>
           </div>
 
-          <div><label className="field-label">Category</label>
+          <div><label className="field-label">{t('category_label')}</label>
             <div className="pill-row">
               {cats.map(c=>(
                 <button key={c} className={cn('pill', f.category===c?CATS[c].pillClass:'')} onClick={()=>set('category',c)}>
-                  {CATS[c].label}
+                  {t(`cat_${c}`)}
                 </button>
               ))}
             </div>
@@ -644,7 +1031,7 @@
           {!isAbsence && (
             <div>
               <label className="field-label">
-                Time Segments{f.category==='split'&&<span style={{ color:'#a78bfa', marginLeft:'.5rem', opacity:.7 }}>· split</span>}
+                {t('time_segments')}{f.category==='split'&&<span style={{ color:'#a78bfa', marginLeft:'.5rem', opacity:.7 }}>· split</span>}
               </label>
               <SegEditor segs={f.segs} onChange={v=>set('segs',v)} />
             </div>
@@ -654,8 +1041,8 @@
             <div>
               <label className="field-label">
                 {f.category==='ot_used'
-                  ? <>OT Hours Used <span style={{ opacity:.4, textTransform:'none', letterSpacing:0 }}>(odečíst z banku)</span></>
-                  : <>Overtime Hours <span style={{ opacity:.4, textTransform:'none', letterSpacing:0 }}>(přesčasy z této směny)</span></>
+                  ? <>{t('cat_ot_used')} <span style={{ opacity:.4, textTransform:'none', letterSpacing:0 }}>{t('ot_deduct')}</span></>
+                  : <>{t('overtime_hours')} <span style={{ opacity:.4, textTransform:'none', letterSpacing:0 }}>{t('ot_from_shift')}</span></>
                 }
               </label>
               <div style={{ display:'flex', flexWrap:'wrap', gap:'.4rem' }}>
@@ -670,12 +1057,12 @@
             </div>
           )}
 
-          <div><label className="field-label">Note <span style={{ opacity:.4, textTransform:'none', letterSpacing:0 }}>(optional)</span></label>
+          <div><label className="field-label">{t('note_label')} <span style={{ opacity:.4, textTransform:'none', letterSpacing:0 }}>{t('note_optional')}</span></label>
             <input type="text" value={f.note} onChange={e=>set('note',e.target.value)} placeholder="doctor visit, overtime…" className="field-input" />
           </div>
 
           <button className={cn('btn-save',saved?'saved':'')} onClick={doSave}>
-            {saved?'✓ Saved':'Save Record'}
+            {saved?t('saved'):t('save_record')}
           </button>
         </div>
       );
@@ -734,11 +1121,11 @@
           <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'.5rem' }}>
               <div style={{ width:18,height:18,borderRadius:5,background:'rgba(96,165,250,.12)',border:'1px solid rgba(96,165,250,.25)',display:'flex',alignItems:'center',justifyContent:'center',fontSize:'.6rem',fontWeight:800,color:'#60a5fa' }}>G</div>
-              <span style={{ fontWeight:700, fontSize:'.88rem' }}>Chef's Intel</span>
+              <span style={{ fontWeight:700, fontSize:'.88rem' }}>{t('chefs_intel')}</span>
               <span style={{ fontSize:'.58rem', fontWeight:700, letterSpacing:'.07em', background:'rgba(96,165,250,.08)', border:'1px solid rgba(96,165,250,.2)', color:'#60a5fa', borderRadius:5, padding:'.15rem .4rem' }}>AI</span>
             </div>
             <button onClick={()=>setShowKey(k=>!k)} style={{ fontSize:'.62rem', letterSpacing:'.07em', background:'none', border:'none', color:'var(--muted)', cursor:'pointer' }}>
-              {showKey?'hide':'set key'}
+              {showKey?t('hide'):t('set_key')}
             </button>
           </div>
 
@@ -757,20 +1144,20 @@
             <input ref={fileRef} type="file" accept="image/*,.txt" className="hidden" style={{display:'none'}} onChange={handleFile} />
             {file
               ? <><FileText size={24} style={{margin:'0 auto .5rem',display:'block',color:'var(--cyan)'}}/><p style={{fontSize:'.8rem',color:'var(--text)',fontWeight:600}}>{file.name}</p><p style={{fontSize:'.68rem',color:'var(--muted)',marginTop:'.2rem'}}>{(file.size/1024).toFixed(0)} KB</p></>
-              : <><Upload size={24} style={{margin:'0 auto .5rem',display:'block',color:'var(--muted)',opacity:.4}}/><p style={{fontSize:'.78rem',color:'var(--muted)'}}>Drop schedule image or text</p></>
+              : <><Upload size={24} style={{margin:'0 auto .5rem',display:'block',color:'var(--muted)',opacity:.4}}/><p style={{fontSize:'.78rem',color:'var(--muted)'}}>{t('drop_file')}</p></>
             }
           </div>
 
           <button onClick={parse} disabled={loading||!file}
             style={{ width:'100%',padding:'.8rem',borderRadius:10,border:'1px solid rgba(96,165,250,.25)',background:loading||!file?'rgba(110,122,150,.05)':'rgba(96,165,250,.08)',color:loading||!file?'var(--muted)':'#60a5fa',fontWeight:700,fontSize:'.8rem',letterSpacing:'.06em',cursor:loading||!file?'not-allowed':'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'.5rem' }}>
-            {loading?<><span className="spin" style={{display:'inline-block',width:14,height:14,border:'2px solid rgba(96,165,250,.3)',borderTop:'2px solid #60a5fa',borderRadius:'50%'}}/>Parsing…</>:'Parse with Gemini'}
+            {loading?<><span className="spin" style={{display:'inline-block',width:14,height:14,border:'2px solid rgba(96,165,250,.3)',borderTop:'2px solid #60a5fa',borderRadius:'50%'}}/>{t('parsing')}</>:t('parse_btn')}
           </button>
 
           {err && <p style={{ fontSize:'.72rem', color:'#f87171', fontFamily:'JetBrains Mono,monospace' }}>{err}</p>}
 
           {parsed && (
             <div style={{ display:'flex', flexDirection:'column', gap:'.5rem' }}>
-              <span style={{ fontSize:'.62rem', color:'var(--muted)', letterSpacing:'.1em', textTransform:'uppercase', fontWeight:600 }}>{parsed.length} shifts detected</span>
+              <span style={{ fontSize:'.62rem', color:'var(--muted)', letterSpacing:'.1em', textTransform:'uppercase', fontWeight:600 }}>{tt('shifts_detected',{n:parsed.length})}</span>
               <div style={{ maxHeight:'10rem', overflowY:'auto' }} className="no-scroll">
                 {parsed.map((s,i)=>(
                   <div key={i} style={{ display:'flex',flexWrap:'wrap',gap:'.3rem',alignItems:'center',background:'var(--bg3)',border:'1px solid var(--border)',borderRadius:8,padding:'.5rem .7rem',marginBottom:'.3rem' }}>
@@ -782,13 +1169,13 @@
               </div>
               <button onClick={doImport}
                 style={{ width:'100%',padding:'.8rem',borderRadius:10,border:'1px solid rgba(52,211,153,.3)',background:'rgba(52,211,153,.08)',color:'#34d399',fontWeight:700,fontSize:'.8rem',letterSpacing:'.05em',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'.5rem' }}>
-                <CheckCircle2 size={14}/>Import as Planned
+                <CheckCircle2 size={14}/>{t('import_as_planned')}
               </button>
             </div>
           )}
 
           <p style={{ fontSize:'.6rem', color:'rgba(110,122,150,.4)', textAlign:'center', fontFamily:'JetBrains Mono,monospace', letterSpacing:'.06em' }}>
-            🔒 API key stays in localStorage — nothing leaves the browser
+            🔒 {t('api_privacy')}
           </p>
         </div>
       );
@@ -818,14 +1205,14 @@
             <button onClick={()=>setMonth(m=>subMonths(m,1))} style={{ padding:'.4rem', borderRadius:8, border:'1px solid var(--border)', background:'none', color:'var(--muted)', cursor:'pointer' }}><ChevronLeft size={16}/></button>
             <div style={{ textAlign:'center' }}>
               <p style={{ fontWeight:700, color:'var(--text)', fontSize:'.95rem' }}>{format(month,'MMMM yyyy')}</p>
-              <p style={{ fontSize:'.65rem', color:'var(--muted)', fontFamily:'JetBrains Mono,monospace', marginTop:'.15rem' }}>{plannedCnt} planned</p>
+              <p style={{ fontSize:'.65rem', color:'var(--muted)', fontFamily:'JetBrains Mono,monospace', marginTop:'.15rem' }}>{tt('planned_count',{n:plannedCnt})}</p>
             </div>
             <button onClick={()=>setMonth(m=>addMonths(m,1))} style={{ padding:'.4rem', borderRadius:8, border:'1px solid var(--border)', background:'none', color:'var(--muted)', cursor:'pointer' }}><ChevronRight size={16}/></button>
           </div>
 
           <button onClick={()=>onBulkFill(month)}
             style={{ width:'100%',padding:'.8rem',borderRadius:12,border:'1px solid rgba(0,245,255,.15)',background:'rgba(0,245,255,.04)',color:'rgba(0,245,255,.7)',fontWeight:600,fontSize:'.8rem',letterSpacing:'.05em',cursor:'pointer',display:'flex',alignItems:'center',justifyContent:'center',gap:'.5rem' }}>
-            <Zap size={14}/>Bulk Fill Weekdays (8h)
+            <Zap size={14}/>{t('bulk_fill')}
           </button>
 
           {/* Calendar */}
@@ -876,7 +1263,7 @@
               <motion.div key={selected} initial={{opacity:0,y:-6}} animate={{opacity:1,y:0}} exit={{opacity:0,y:-6}}
                 className="section-card" style={{ display:'flex', flexDirection:'column', gap:'.75rem' }}>
                 <p style={{ fontSize:'.72rem', fontFamily:'JetBrains Mono,monospace', color:'var(--muted)' }}>{format(parseISO(selected),'EEEE, MMMM d, yyyy')}</p>
-                {(dayMap[selected]||[]).length===0 && <p style={{ fontSize:'.8rem', color:'var(--muted)', fontFamily:'monospace' }}>No records for this day.</p>}
+                {(dayMap[selected]||[]).length===0 && <p style={{ fontSize:'.8rem', color:'var(--muted)', fontFamily:'monospace' }}>{t('no_records_day')}</p>}
                 {(dayMap[selected]||[]).map(r=>(
                   <div key={r.id} style={{ display:'flex', flexDirection:'column', gap:'.4rem', paddingBottom:'.75rem', borderBottom:'1px solid var(--border)' }} className="last:border-0 last:pb-0">
                     <div style={{ display:'flex', alignItems:'center', gap:'.4rem', flexWrap:'wrap' }}>
@@ -903,7 +1290,7 @@
 
           {/* Legend */}
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'.5rem .75rem' }}>
-            {[['rgba(0,245,255,.2)','rgba(0,245,255,.06)','var(--cyan)','Planned'],['rgba(52,211,153,.25)','rgba(52,211,153,.1)','#34d399','Actual + Planned'],['rgba(110,122,150,.2)','rgba(110,122,150,.08)','var(--text)','Actual only'],['rgba(248,113,113,.25)','rgba(248,113,113,.1)','#f87171','Absence']].map(([br,bg,c,l])=>(
+            {[['rgba(0,245,255,.2)','rgba(0,245,255,.06)','var(--cyan)',t('legend_planned')],['rgba(52,211,153,.25)','rgba(52,211,153,.1)','#34d399',t('legend_actual_planned')],['rgba(110,122,150,.2)','rgba(110,122,150,.08)','var(--text)',t('legend_actual')],['rgba(248,113,113,.25)','rgba(248,113,113,.1)','#f87171',t('legend_absence')]].map(([br,bg,c,l])=>(
               <div key={l} style={{ display:'flex', alignItems:'center', gap:'.4rem', fontSize:'.62rem', color:'var(--muted)' }}>
                 <span style={{ width:10,height:10,borderRadius:3,border:`1px solid ${br}`,background:bg,flexShrink:0,display:'inline-block' }}/>
                 {l}
@@ -968,17 +1355,17 @@
           <div className="section-card" style={{ borderColor:isOver?'rgba(52,211,153,.2)':isUnder?'rgba(248,113,113,.2)':'var(--border)', background:isOver?'rgba(52,211,153,.04)':isUnder?'rgba(248,113,113,.04)':'var(--bg2)' }}>
             <div style={{ display:'flex', alignItems:'center', gap:'.5rem', marginBottom:'.5rem' }}>
               {isOver?<TrendingUp size={14} style={{color:'#34d399'}}/>:isUnder?<TrendingDown size={14} style={{color:'#f87171'}}/>:<Minus size={14} style={{color:'var(--muted)'}}/>}
-              <span style={{ fontSize:'.6rem', fontWeight:700, letterSpacing:'.15em', textTransform:'uppercase', color:'var(--muted)' }}>All-Time Balance · The Delta</span>
+              <span style={{ fontSize:'.6rem', fontWeight:700, letterSpacing:'.15em', textTransform:'uppercase', color:'var(--muted)' }}>{t('all_time_balance')}</span>
             </div>
             <div style={{ fontSize:'clamp(2.5rem,12vw,3.5rem)', fontFamily:'JetBrains Mono,monospace', fontWeight:700, color:isOver?'#34d399':isUnder?'#f87171':'var(--muted)', textShadow:isOver?'0 0 30px rgba(52,211,153,.3)':isUnder?'0 0 30px rgba(248,113,113,.3)':'none' }}>
               {bal>=0?'+':''}{bal.toFixed(1)}h
             </div>
             <p style={{ fontSize:'.78rem', color:isOver?'rgba(52,211,153,.5)':isUnder?'rgba(248,113,113,.5)':'var(--muted)', marginTop:'.25rem' }}>
-              {isOver?'Overtime — ahead of schedule':isUnder?'Undertime — behind schedule':'Right on track'}
+              {isOver?t('overtime_text'):isUnder?t('undertime_text'):t('on_track_text')}
             </p>
             <div style={{ display:'flex', gap:'2rem', marginTop:'1rem', paddingTop:'1rem', borderTop:'1px solid var(--border)' }}>
-              <div><p style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Worked</p><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'1.1rem', color:'var(--cyan)' }}>{toH(totals.actual)}h</p></div>
-              <div><p style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Planned</p><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'1.1rem', color:'var(--muted)' }}>{toH(totals.planned)}h</p></div>
+              <div><p style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>{t('worked_label')}</p><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'1.1rem', color:'var(--cyan)' }}>{toH(totals.actual)}h</p></div>
+              <div><p style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>{t('planned_label')}</p><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'1.1rem', color:'var(--muted)' }}>{toH(totals.planned)}h</p></div>
             </div>
           </div>
 
@@ -989,14 +1376,14 @@
             <div className="section-card" style={{ borderColor:'rgba(255,45,120,.2)', background:'rgba(255,45,120,.03)' }}>
               <div style={{ display:'flex', alignItems:'center', gap:'.5rem', marginBottom:'.5rem' }}>
                 <Minus size={14} style={{color:'var(--magenta)'}}/>
-                <span style={{ fontSize:'.6rem', fontWeight:700, letterSpacing:'.15em', textTransform:'uppercase', color:'var(--muted)' }}>Overtime Bank</span>
+                <span style={{ fontSize:'.6rem', fontWeight:700, letterSpacing:'.15em', textTransform:'uppercase', color:'var(--muted)' }}>{t('overtime_bank')}</span>
               </div>
               <div style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:isPos?'#34d399':isNeg?'#f87171':'var(--muted)' }}>
                 {bank>=0?'+':''}{bank.toFixed(1)}h
               </div>
               <div style={{ display:'flex', gap:'2rem', marginTop:'.75rem', paddingTop:'.75rem', borderTop:'1px solid var(--border)' }}>
-                <div><p style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Earned</p><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, color:'var(--magenta)' }}>+{(totals.otEarned/60).toFixed(1)}h</p></div>
-                <div><p style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Used</p><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, color:'var(--muted)' }}>-{(totals.otUsed/60).toFixed(1)}h</p></div>
+                <div><p style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>{t('earned_label')}</p><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, color:'var(--magenta)' }}>+{(totals.otEarned/60).toFixed(1)}h</p></div>
+                <div><p style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>{t('used_label')}</p><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, color:'var(--muted)' }}>-{(totals.otUsed/60).toFixed(1)}h</p></div>
               </div>
             </div>
             );
@@ -1004,16 +1391,16 @@
 
           {(totals.sick>0||totals.vacation>0||totals.holiday>0||totals.special>0)&&(
             <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'.75rem' }}>
-              {totals.sick>0&&<div className="section-card" style={{ borderColor:'rgba(248,113,113,.2)', background:'rgba(248,113,113,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Activity size={12} style={{color:'#f87171'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Sick</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#f87171' }}>{totals.sick}</p></div>}
-              {totals.vacation>0&&<div className="section-card" style={{ borderColor:'rgba(52,211,153,.2)', background:'rgba(52,211,153,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Star size={12} style={{color:'#34d399'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Vacation</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#34d399' }}>{totals.vacation}</p></div>}
-              {totals.holiday>0&&<div className="section-card" style={{ borderColor:'rgba(96,165,250,.2)', background:'rgba(96,165,250,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Star size={12} style={{color:'#60a5fa'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Holiday</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#60a5fa' }}>{totals.holiday}</p></div>}
-              {totals.special>0&&<div className="section-card" style={{ borderColor:'rgba(96,165,250,.2)', background:'rgba(96,165,250,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Star size={12} style={{color:'#60a5fa'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>Special</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#60a5fa' }}>{totals.special}</p></div>}
+              {totals.sick>0&&<div className="section-card" style={{ borderColor:'rgba(248,113,113,.2)', background:'rgba(248,113,113,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Activity size={12} style={{color:'#f87171'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>{t('cat_sick_stat')}</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#f87171' }}>{totals.sick}</p></div>}
+              {totals.vacation>0&&<div className="section-card" style={{ borderColor:'rgba(52,211,153,.2)', background:'rgba(52,211,153,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Star size={12} style={{color:'#34d399'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>{t('cat_vacation_stat')}</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#34d399' }}>{totals.vacation}</p></div>}
+              {totals.holiday>0&&<div className="section-card" style={{ borderColor:'rgba(96,165,250,.2)', background:'rgba(96,165,250,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Star size={12} style={{color:'#60a5fa'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>{t('cat_holiday_stat')}</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#60a5fa' }}>{totals.holiday}</p></div>}
+              {totals.special>0&&<div className="section-card" style={{ borderColor:'rgba(96,165,250,.2)', background:'rgba(96,165,250,.04)' }}><div style={{ display:'flex', gap:'.4rem', alignItems:'center', marginBottom:'.4rem' }}><Star size={12} style={{color:'#60a5fa'}}/><span style={{ fontSize:'.58rem', color:'var(--muted)', textTransform:'uppercase', letterSpacing:'.1em', fontWeight:600 }}>{t('cat_special_stat')}</span></div><p style={{ fontFamily:'JetBrains Mono,monospace', fontWeight:700, fontSize:'2rem', color:'#60a5fa' }}>{totals.special}</p></div>}
             </div>
           )}
 
           {/* Chart */}
           <div className="section-card">
-            <div className="section-label">8-Week · Actual vs Planned</div>
+            <div className="section-label">{t('week_chart')}</div>
             {records.length>0?(
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={weekData} margin={{top:0,right:0,left:-28,bottom:0}} barGap={3}>
@@ -1021,18 +1408,18 @@
                   <XAxis dataKey="week" tick={{fill:'var(--muted)',fontSize:9,fontFamily:'monospace'}} axisLine={false} tickLine={false}/>
                   <YAxis tick={{fill:'var(--muted)',fontSize:9,fontFamily:'monospace'}} axisLine={false} tickLine={false}/>
                   <Tooltip content={<ChartTip/>} cursor={{fill:'rgba(0,245,255,.03)'}}/>
-                  <Bar dataKey="planned" name="Planned" fill="rgba(110,122,150,.3)" radius={[3,3,0,0]} maxBarSize={16}/>
-                  <Bar dataKey="actual"  name="Actual"  fill="var(--cyan)"          radius={[3,3,0,0]} maxBarSize={16}/>
+                  <Bar dataKey="planned" name={t('planned_label')} fill="rgba(110,122,150,.3)" radius={[3,3,0,0]} maxBarSize={16}/>
+                  <Bar dataKey="actual"  name={t('worked_label')}  fill="var(--cyan)"          radius={[3,3,0,0]} maxBarSize={16}/>
                 </BarChart>
               </ResponsiveContainer>
             ):(
-              <div style={{ height:180, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--muted)', fontSize:'.8rem', fontFamily:'monospace' }}>No data yet</div>
+              <div style={{ height:180, display:'flex', alignItems:'center', justifyContent:'center', color:'var(--muted)', fontSize:'.8rem', fontFamily:'monospace' }}>{t('no_data')}</div>
             )}
           </div>
 
           {daily.length>0&&(
             <div>
-              <div className="section-label">Daily Detail</div>
+              <div className="section-label">{t('daily_detail')}</div>
               <div style={{ display:'flex', flexDirection:'column', gap:'.5rem' }}>
                 {daily.map(d=>{
                   const delta=d.delta/60;
@@ -1046,7 +1433,7 @@
                         {d.checkIn &&<span>IN {d.checkIn}</span>}
                         {d.checkOut&&<span>OUT {d.checkOut}</span>}
                         {d.aMin>0  &&<span style={{color:'var(--cyan)'}}>{fmtMins(d.aMin)}</span>}
-                        {d.pMin>0  &&<span>/ {fmtMins(d.pMin)} planned</span>}
+                        {d.pMin>0  &&<span>/ {fmtMins(d.pMin)} {t('planned_stat')}</span>}
                       </div>
                     </div>
                   );
@@ -1059,7 +1446,16 @@
     }
 
     // ── SETTINGS MODAL ────────────────────────────────────────────────────────
-    function SettingsModal({ onClose, onReset }) {
+    const LANG_OPTIONS = [
+      { code:'en', flag:'🇬🇧', label:'EN' },
+      { code:'de', flag:'🇩🇪', label:'DE' },
+      { code:'it', flag:'🇮🇹', label:'IT' },
+      { code:'cs', flag:'🇨🇿', label:'CS' },
+      { code:'sk', flag:'🇸🇰', label:'SK' },
+      { code:'hu', flag:'🇭🇺', label:'HU' },
+    ];
+
+    function SettingsModal({ onClose, onReset, lang, onLangChange }) {
       const [step, setStep] = useState(0);
 
       const confirmReset = () => { onReset(); onClose(); };
@@ -1077,15 +1473,31 @@
                 <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.25rem' }}>
                   <div style={{ display:'flex', alignItems:'center', gap:'.5rem' }}>
                     <Settings size={14} style={{ color:'var(--cyan)' }}/>
-                    <span style={{ fontWeight:700, fontSize:'.9rem', color:'var(--text)' }}>Settings</span>
+                    <span style={{ fontWeight:700, fontSize:'.9rem', color:'var(--text)' }}>{t('settings_title')}</span>
                   </div>
                   <button onClick={onClose} style={{ background:'none', border:'none', color:'var(--muted)', cursor:'pointer', padding:'.2rem', display:'flex' }}><X size={15}/></button>
                 </div>
+
+                {/* Language Picker */}
+                <div style={{ marginBottom:'1.25rem' }}>
+                  <p style={{ fontSize:'.6rem', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'var(--muted)', marginBottom:'.65rem' }}>{t('lang_label')}</p>
+                  <div style={{ display:'flex', gap:'.4rem', flexWrap:'wrap' }}>
+                    {LANG_OPTIONS.map(({code,flag,label})=>(
+                      <button key={code}
+                        className={`pill ${lang===code?'active-cyan':''}`}
+                        style={{ flex:'none', padding:'.45rem .6rem', fontSize:'.72rem', display:'flex', alignItems:'center', gap:'.3rem' }}
+                        onClick={()=>onLangChange(code)}>
+                        <span>{flag}</span>{label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
                 <div style={{ borderTop:'1px solid var(--border)', paddingTop:'1rem' }}>
-                  <p style={{ fontSize:'.6rem', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#f87171', marginBottom:'.75rem', opacity:.7 }}>Danger Zone</p>
+                  <p style={{ fontSize:'.6rem', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#f87171', marginBottom:'.75rem', opacity:.7 }}>{t('danger_zone')}</p>
                   <button onClick={()=>setStep(1)}
                     style={{ width:'100%', padding:'.75rem 1rem', borderRadius:10, border:'1px solid rgba(248,113,113,.25)', background:'rgba(248,113,113,.04)', color:'#f87171', fontWeight:700, fontSize:'.82rem', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'.5rem', letterSpacing:'.04em' }}>
-                    <Trash2 size={14}/>Odstranit všechna data
+                    <Trash2 size={14}/>{t('delete_data_btn')}
                   </button>
                 </div>
               </>
@@ -1096,13 +1508,13 @@
                 <div style={{ display:'flex', alignItems:'flex-start', gap:'.75rem', marginBottom:'1rem' }}>
                   <AlertTriangle size={16} style={{ color:'#fbbf24', flexShrink:0, marginTop:'2px' }}/>
                   <div>
-                    <p style={{ color:'var(--text)', fontWeight:700, fontSize:'.9rem' }}>Opravdu smazat data?</p>
-                    <p style={{ color:'var(--muted)', fontSize:'.8rem', marginTop:'.35rem', lineHeight:1.5 }}>Všechny směny, plány a záznamy budou trvale odstraněny.</p>
+                    <p style={{ color:'var(--text)', fontWeight:700, fontSize:'.9rem' }}>{t('confirm1_title')}</p>
+                    <p style={{ color:'var(--muted)', fontSize:'.8rem', marginTop:'.35rem', lineHeight:1.5 }}>{t('confirm1_sub')}</p>
                   </div>
                 </div>
                 <div style={{ display:'flex', gap:'.6rem', marginTop:'1.25rem' }}>
-                  <button onClick={onClose} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'1px solid var(--border)', background:'none', color:'var(--muted)', fontWeight:600, fontSize:'.82rem', cursor:'pointer' }}>Zrušit</button>
-                  <button onClick={()=>setStep(2)} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'1px solid rgba(248,113,113,.35)', background:'rgba(248,113,113,.08)', color:'#f87171', fontWeight:700, fontSize:'.82rem', cursor:'pointer' }}>Ano, smazat</button>
+                  <button onClick={onClose} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'1px solid var(--border)', background:'none', color:'var(--muted)', fontWeight:600, fontSize:'.82rem', cursor:'pointer' }}>{t('confirm1_cancel')}</button>
+                  <button onClick={()=>setStep(2)} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'1px solid rgba(248,113,113,.35)', background:'rgba(248,113,113,.08)', color:'#f87171', fontWeight:700, fontSize:'.82rem', cursor:'pointer' }}>{t('confirm1_ok')}</button>
                 </div>
               </>
             )}
@@ -1112,13 +1524,13 @@
                 <div style={{ display:'flex', alignItems:'flex-start', gap:'.75rem', marginBottom:'1rem' }}>
                   <AlertTriangle size={16} style={{ color:'#f87171', flexShrink:0, marginTop:'2px' }}/>
                   <div>
-                    <p style={{ color:'#f87171', fontWeight:700, fontSize:'.9rem' }}>Poslední šance</p>
-                    <p style={{ color:'var(--muted)', fontSize:'.8rem', marginTop:'.35rem', lineHeight:1.5 }}>Tato akce je nevratná. Aplikace se vrátí do továrního nastavení.</p>
+                    <p style={{ color:'#f87171', fontWeight:700, fontSize:'.9rem' }}>{t('confirm2_title')}</p>
+                    <p style={{ color:'var(--muted)', fontSize:'.8rem', marginTop:'.35rem', lineHeight:1.5 }}>{t('confirm2_sub')}</p>
                   </div>
                 </div>
                 <div style={{ display:'flex', gap:'.6rem', marginTop:'1.25rem' }}>
-                  <button onClick={onClose} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'1px solid var(--border)', background:'none', color:'var(--muted)', fontWeight:600, fontSize:'.82rem', cursor:'pointer' }}>Zrušit</button>
-                  <button onClick={confirmReset} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'none', background:'#f87171', color:'#050810', fontWeight:800, fontSize:'.82rem', cursor:'pointer', letterSpacing:'.04em' }}>Smazat vše</button>
+                  <button onClick={onClose} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'1px solid var(--border)', background:'none', color:'var(--muted)', fontWeight:600, fontSize:'.82rem', cursor:'pointer' }}>{t('confirm2_cancel')}</button>
+                  <button onClick={confirmReset} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'none', background:'#f87171', color:'#050810', fontWeight:800, fontSize:'.82rem', cursor:'pointer', letterSpacing:'.04em' }}>{t('confirm2_ok')}</button>
                 </div>
               </>
             )}
@@ -1129,10 +1541,10 @@
 
     // ── APP ────────────────────────────────────────────────────────────────────
     const TABS = [
-      { id:'timer', label:'Timer', Icon: Clock        },
-      { id:'entry', label:'Log',   Icon: PenLine       },
-      { id:'plan',  label:'Plan',  Icon: CalendarDays  },
-      { id:'stats', label:'Stats', Icon: BarChart3     },
+      { id:'timer', tkey:'tab_timer', Icon: Clock        },
+      { id:'entry', tkey:'tab_log',   Icon: PenLine       },
+      { id:'plan',  tkey:'tab_plan',  Icon: CalendarDays  },
+      { id:'stats', tkey:'tab_stats', Icon: BarChart3     },
     ];
 
     function App() {
@@ -1140,6 +1552,10 @@
       const [records,      setRecs]        = useLS(KEYS.RECORDS,[]);
       const [active,       setActive]      = useLS(KEYS.ACTIVE, null);
       const [showSettings, setShowSettings]= useState(false);
+      const [lang,         setLang]        = useLS('cs_lang', 'en');
+
+      // Initialize module-level translation dict on every render
+      _t = TRANS[lang] || TRANS.en;
 
       const handleReset = useCallback(()=>{
         Object.values(KEYS).forEach(k=>localStorage.removeItem(k));
@@ -1187,13 +1603,13 @@
               </div>
               <div>
                 <h1 style={{ fontSize:'.95rem', fontWeight:700, color:'var(--text)', letterSpacing:'.01em', lineHeight:1.2 }}>TrueHours</h1>
-                <p style={{ fontSize:'.55rem', fontWeight:700, letterSpacing:'.18em', textTransform:'uppercase', color:'var(--muted)', opacity:.7, marginTop:'.1rem' }}>Pro · 8th Ape Studio</p>
+                <p style={{ fontSize:'.55rem', fontWeight:700, letterSpacing:'.18em', textTransform:'uppercase', color:'var(--muted)', opacity:.7, marginTop:'.1rem' }}>{t('app_subtitle')}</p>
               </div>
               <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:'.5rem' }}>
                 {active && (
                   <div className="live-badge">
                     <span className="status-dot live" />
-                    <span style={{ fontSize:'.58rem', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'var(--cyan)' }}>Live</span>
+                    <span style={{ fontSize:'.58rem', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'var(--cyan)' }}>{t('live')}</span>
                   </div>
                 )}
                 <button onClick={()=>setShowSettings(true)}
@@ -1224,20 +1640,20 @@
           {/* Settings Modal */}
           <AnimatePresence>
             {showSettings && (
-              <SettingsModal onClose={()=>setShowSettings(false)} onReset={handleReset}/>
+              <SettingsModal onClose={()=>setShowSettings(false)} onReset={handleReset} lang={lang} onLangChange={setLang}/>
             )}
           </AnimatePresence>
 
           {/* Tab Bar */}
           <nav style={{ flexShrink:0, borderTop:'1px solid var(--border)', background:'var(--bg)', padding:'.4rem .5rem max(.75rem, env(safe-area-inset-bottom))' }}>
             <div style={{ display:'flex' }}>
-              {TABS.map(({id,label,Icon})=>{
+              {TABS.map(({id,tkey,Icon})=>{
                 const isA=tab===id;
                 return(
                   <button key={id} className={`nav-tab ${isA?'active':''}`} onClick={()=>setTab(id)}>
                     <Icon size={18} strokeWidth={isA?2.5:1.8}
                       style={{ filter:isA?'drop-shadow(0 0 6px rgba(0,245,255,.5))':'none' }}/>
-                    <span className="nav-tab__label">{label}</span>
+                    <span className="nav-tab__label">{t(tkey)}</span>
                     {isA && (
                       <motion.span layoutId="tab-pip" className="nav-tab__pip"
                         transition={{type:'spring',stiffness:420,damping:32}}/>
