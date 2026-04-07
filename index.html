@@ -360,6 +360,7 @@
       TrendingUp, TrendingDown, Minus,
       Plus, X, Upload, FileText, Info,
       CheckCircle2, Sun, Sunset, Scissors, Activity, Star,
+      Settings, Trash2,
     } from 'lucide-react';
     import {
       BarChart, Bar, XAxis, YAxis,
@@ -1057,6 +1058,75 @@
       );
     }
 
+    // ── SETTINGS MODAL ────────────────────────────────────────────────────────
+    function SettingsModal({ onClose, onReset }) {
+      const [step, setStep] = useState(0);
+
+      const confirmReset = () => { onReset(); onClose(); };
+
+      return (
+        <div className="modal-overlay" onClick={onClose}>
+          <motion.div
+            initial={{ y:80, opacity:0 }} animate={{ y:0, opacity:1 }} exit={{ y:80, opacity:0 }}
+            transition={{ type:'spring', damping:28, stiffness:300 }}
+            style={{ width:'100%', maxWidth:'22rem', background:'var(--bg2)', border:'1px solid var(--border)', borderRadius:'18px', padding:'1.5rem', boxShadow:'0 0 80px rgba(0,245,255,.06)' }}
+            onClick={e=>e.stopPropagation()}>
+
+            {step===0 && (
+              <>
+                <div style={{ display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:'1.25rem' }}>
+                  <div style={{ display:'flex', alignItems:'center', gap:'.5rem' }}>
+                    <Settings size={14} style={{ color:'var(--cyan)' }}/>
+                    <span style={{ fontWeight:700, fontSize:'.9rem', color:'var(--text)' }}>Settings</span>
+                  </div>
+                  <button onClick={onClose} style={{ background:'none', border:'none', color:'var(--muted)', cursor:'pointer', padding:'.2rem', display:'flex' }}><X size={15}/></button>
+                </div>
+                <div style={{ borderTop:'1px solid var(--border)', paddingTop:'1rem' }}>
+                  <p style={{ fontSize:'.6rem', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'#f87171', marginBottom:'.75rem', opacity:.7 }}>Danger Zone</p>
+                  <button onClick={()=>setStep(1)}
+                    style={{ width:'100%', padding:'.75rem 1rem', borderRadius:10, border:'1px solid rgba(248,113,113,.25)', background:'rgba(248,113,113,.04)', color:'#f87171', fontWeight:700, fontSize:'.82rem', cursor:'pointer', display:'flex', alignItems:'center', justifyContent:'center', gap:'.5rem', letterSpacing:'.04em' }}>
+                    <Trash2 size={14}/>Odstranit všechna data
+                  </button>
+                </div>
+              </>
+            )}
+
+            {step===1 && (
+              <>
+                <div style={{ display:'flex', alignItems:'flex-start', gap:'.75rem', marginBottom:'1rem' }}>
+                  <AlertTriangle size={16} style={{ color:'#fbbf24', flexShrink:0, marginTop:'2px' }}/>
+                  <div>
+                    <p style={{ color:'var(--text)', fontWeight:700, fontSize:'.9rem' }}>Opravdu smazat data?</p>
+                    <p style={{ color:'var(--muted)', fontSize:'.8rem', marginTop:'.35rem', lineHeight:1.5 }}>Všechny směny, plány a záznamy budou trvale odstraněny.</p>
+                  </div>
+                </div>
+                <div style={{ display:'flex', gap:'.6rem', marginTop:'1.25rem' }}>
+                  <button onClick={onClose} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'1px solid var(--border)', background:'none', color:'var(--muted)', fontWeight:600, fontSize:'.82rem', cursor:'pointer' }}>Zrušit</button>
+                  <button onClick={()=>setStep(2)} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'1px solid rgba(248,113,113,.35)', background:'rgba(248,113,113,.08)', color:'#f87171', fontWeight:700, fontSize:'.82rem', cursor:'pointer' }}>Ano, smazat</button>
+                </div>
+              </>
+            )}
+
+            {step===2 && (
+              <>
+                <div style={{ display:'flex', alignItems:'flex-start', gap:'.75rem', marginBottom:'1rem' }}>
+                  <AlertTriangle size={16} style={{ color:'#f87171', flexShrink:0, marginTop:'2px' }}/>
+                  <div>
+                    <p style={{ color:'#f87171', fontWeight:700, fontSize:'.9rem' }}>Poslední šance</p>
+                    <p style={{ color:'var(--muted)', fontSize:'.8rem', marginTop:'.35rem', lineHeight:1.5 }}>Tato akce je nevratná. Aplikace se vrátí do továrního nastavení.</p>
+                  </div>
+                </div>
+                <div style={{ display:'flex', gap:'.6rem', marginTop:'1.25rem' }}>
+                  <button onClick={onClose} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'1px solid var(--border)', background:'none', color:'var(--muted)', fontWeight:600, fontSize:'.82rem', cursor:'pointer' }}>Zrušit</button>
+                  <button onClick={confirmReset} style={{ flex:1, padding:'.7rem', borderRadius:10, border:'none', background:'#f87171', color:'#050810', fontWeight:800, fontSize:'.82rem', cursor:'pointer', letterSpacing:'.04em' }}>Smazat vše</button>
+                </div>
+              </>
+            )}
+          </motion.div>
+        </div>
+      );
+    }
+
     // ── APP ────────────────────────────────────────────────────────────────────
     const TABS = [
       { id:'timer', label:'Timer', Icon: Clock        },
@@ -1066,9 +1136,16 @@
     ];
 
     function App() {
-      const [tab,    setTab]    = useState('timer');
-      const [records,setRecs]   = useLS(KEYS.RECORDS,[]);
-      const [active, setActive] = useLS(KEYS.ACTIVE, null);
+      const [tab,          setTab]         = useState('timer');
+      const [records,      setRecs]        = useLS(KEYS.RECORDS,[]);
+      const [active,       setActive]      = useLS(KEYS.ACTIVE, null);
+      const [showSettings, setShowSettings]= useState(false);
+
+      const handleReset = useCallback(()=>{
+        Object.values(KEYS).forEach(k=>localStorage.removeItem(k));
+        setRecs([]);
+        setActive(null);
+      },[setRecs,setActive]);
 
       const handleIn = useCallback(()=>{
         const now=new Date();
@@ -1112,12 +1189,20 @@
                 <h1 style={{ fontSize:'.95rem', fontWeight:700, color:'var(--text)', letterSpacing:'.01em', lineHeight:1.2 }}>TrueHours</h1>
                 <p style={{ fontSize:'.55rem', fontWeight:700, letterSpacing:'.18em', textTransform:'uppercase', color:'var(--muted)', opacity:.7, marginTop:'.1rem' }}>Pro · 8th Ape Studio</p>
               </div>
-              {active && (
-                <div className="live-badge" style={{ marginLeft:'auto' }}>
-                  <span className="status-dot live" />
-                  <span style={{ fontSize:'.58rem', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'var(--cyan)' }}>Live</span>
-                </div>
-              )}
+              <div style={{ marginLeft:'auto', display:'flex', alignItems:'center', gap:'.5rem' }}>
+                {active && (
+                  <div className="live-badge">
+                    <span className="status-dot live" />
+                    <span style={{ fontSize:'.58rem', fontWeight:700, letterSpacing:'.12em', textTransform:'uppercase', color:'var(--cyan)' }}>Live</span>
+                  </div>
+                )}
+                <button onClick={()=>setShowSettings(true)}
+                  style={{ padding:'.45rem', borderRadius:8, border:'1px solid var(--border)', background:'none', color:'var(--muted)', cursor:'pointer', display:'flex', alignItems:'center', transition:'all .15s' }}
+                  onMouseEnter={e=>{ e.currentTarget.style.borderColor='rgba(0,245,255,.3)'; e.currentTarget.style.color='var(--cyan)'; }}
+                  onMouseLeave={e=>{ e.currentTarget.style.borderColor='var(--border)'; e.currentTarget.style.color='var(--muted)'; }}>
+                  <Settings size={15}/>
+                </button>
+              </div>
             </div>
           </header>
 
@@ -1135,6 +1220,13 @@
             </AnimatePresence>
             <div style={{ height:'1rem' }}/>
           </main>
+
+          {/* Settings Modal */}
+          <AnimatePresence>
+            {showSettings && (
+              <SettingsModal onClose={()=>setShowSettings(false)} onReset={handleReset}/>
+            )}
+          </AnimatePresence>
 
           {/* Tab Bar */}
           <nav style={{ flexShrink:0, borderTop:'1px solid var(--border)', background:'var(--bg)', padding:'.4rem .5rem max(.75rem, env(safe-area-inset-bottom))' }}>
